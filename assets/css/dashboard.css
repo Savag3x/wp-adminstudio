@@ -29,7 +29,7 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 
 .mwd-dash {
 	--a: var(--mwd-accent, #10b981);
-	--nv: var(--mwd-sidebar-bg, #0f2744);
+	--nv: #0f172a; /* text, nu culoarea sidebar-ului (presetul Light are sidebar alb) */
 	--r: var(--mwd-radius, 12px);
 	max-width: 1320px;
 	margin: 16px 20px 24px 2px;
@@ -62,7 +62,7 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 	border-radius: 999px;
 	line-height: 1;
 }
-.mwd-dash .mwd-dash-period-btn:hover { color: var(--mwd-sidebar-bg, #0f2744); }
+.mwd-dash .mwd-dash-period-btn:hover { color: #0f172a; }
 .mwd-dash .mwd-dash-period-btn.is-active,
 .mwd-dash .mwd-dash-period-btn.is-active:hover { background: var(--mwd-accent, #10b981); color: #fff; }
 .mwd-dash-title {
@@ -150,6 +150,7 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 	gap: 14px;
+	align-items: start; /* fără carduri întinse cu spațiu gol */
 }
 .mwd-dash-card {
 	background: #fff;
@@ -228,7 +229,7 @@ a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.0
 	background: rgba(var(--mwd-accent-rgb, 16, 185, 129), .08);
 	border: 1px solid rgba(var(--mwd-accent-rgb, 16, 185, 129), .25);
 	border-radius: calc(var(--mwd-radius,12px) - 4px);
-	padding: 12px 14px; text-decoration: none; color: var(--mwd-sidebar-bg,#0f2744);
+	padding: 12px 14px; text-decoration: none; color: #0f172a;
 	font-size: 13px; font-weight: 500;
 }
 .mwd-dash-woo-big {
@@ -250,7 +251,7 @@ a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.0
 .mwd-dash-chart .line { fill: none; stroke: var(--mwd-accent,#10b981); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
 .mwd-dash-chart .bar { fill: var(--mwd-accent,#10b981); opacity: .85; }
 .mwd-dash-vis-nums { font-size: 13px; color: #2c3340; }
-.mwd-dash-vis-nums .num { font-size: 20px; font-weight: 700; color: var(--mwd-sidebar-bg,#0f2744); }
+.mwd-dash-vis-nums .num { font-size: 20px; font-weight: 700; color: #0f172a; }
 .mwd-dash-muted { color: #8a94a6; font-size: 12px; margin-top: 2px; }
 .mwd-dash-muted .num { font-size: 12px; font-weight: 600; color: #50575e; }
 
@@ -309,3 +310,97 @@ a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.0
 	color: #64748b;
 	font: 600 10px/1.2 var(--mwd-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
+
+/* ===== Grafic de trend ===== */
+.mwd-dash-trend { margin-bottom: 14px; overflow: visible; }
+.mwd-dash-trend-head {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+	padding: 16px 18px 6px;
+}
+.mwd-dash-trend-tabs {
+	display: inline-flex;
+	padding: 3px;
+	border-radius: 10px;
+	background: #f1f5f9;
+	border: 1px solid rgba(15, 23, 42, .06);
+}
+.mwd-dash-trend-tab {
+	padding: 6px 14px;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	color: #64748b;
+	font: 600 12.5px/1.2 var(--mwd-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+	cursor: pointer;
+	transition: background-color .12s ease, color .12s ease, box-shadow .12s ease;
+}
+.mwd-dash-trend-tab:hover { color: #0f172a; }
+.mwd-dash-trend-tab.is-active { background: #fff; color: #0f172a; box-shadow: 0 1px 3px rgba(15, 23, 42, .12); }
+.mwd-dash-trend-tab:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(var(--mwd-accent-rgb, 16, 185, 129), .25); }
+.mwd-dash-trend-hero { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.mwd-dash-trend-total {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	color: #0f172a;
+}
+.mwd-dash-trend-sub { color: #94a3b8; font-size: 12px; }
+.mwd-dash-trend-plot { position: relative; min-height: 230px; padding: 4px 12px 10px 6px; }
+
+.mwd-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.mwd-chart-grid { stroke: #eef2f6; stroke-width: 1; shape-rendering: crispEdges; }
+.mwd-chart-base { stroke: #dbe2ea; stroke-width: 1; shape-rendering: crispEdges; }
+.mwd-chart-axis { fill: #94a3b8; font-size: 11px; font-variant-numeric: tabular-nums; }
+.mwd-chart-area { fill: var(--mwd-accent, #10b981); opacity: .1; }
+.mwd-chart-line { fill: none; stroke: var(--mwd-accent, #10b981); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.mwd-chart-dot { fill: var(--mwd-accent, #10b981); stroke: #fff; stroke-width: 2; }
+.mwd-chart-bar { fill: var(--mwd-accent, #10b981); transition: opacity .12s ease; }
+.mwd-chart-bar.is-dim { opacity: .45; }
+.mwd-chart-cross { stroke: #94a3b8; stroke-width: 1; shape-rendering: crispEdges; }
+.mwd-chart-tip {
+	position: absolute;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 7px 10px;
+	border-radius: 8px;
+	background: #0f172a;
+	color: #cbd5e1;
+	font-size: 11.5px;
+	white-space: nowrap;
+	pointer-events: none;
+	box-shadow: 0 10px 24px -8px rgba(15, 23, 42, .45);
+}
+.mwd-chart-tip strong { color: #fff; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.mwd-chart-tip[hidden] { display: none; }
+
+/* ===== Live ===== */
+.mwd-dash-live-badge {
+	float: right;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: #64748b;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: .05em;
+}
+.mwd-dash-live-badge .mwd-dash-online-dot { background: var(--mwd-accent, #10b981); animation: mwd-pulse 1.8s infinite; }
+#mwd-live-list .dashicons { font-size: 16px; width: 16px; height: 16px; color: #94a3b8; vertical-align: -3px; }
+
+/* ===== Sănătate site ===== */
+.mwd-dash-health { justify-content: flex-start; gap: 12px; }
+.mwd-dash-health-ico { flex: 0 0 auto; font-size: 20px; width: 20px; height: 20px; }
+.mwd-dash-health.is-ok .mwd-dash-health-ico { color: #059669; }
+.mwd-dash-health.is-warn .mwd-dash-health-ico { color: #d97706; }
+.mwd-dash-health-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mwd-dash-health-txt .mwd-dash-muted { margin: 0; }
+
+/* Valorile KPI rămân în culoarea textului (culoarea de accent e rezervată graficelor). */
+.mwd-dash-stat-num.is-accent { color: var(--nv); }

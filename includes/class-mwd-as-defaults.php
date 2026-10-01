@@ -9,6 +9,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 class MWD_AS_Defaults {
 
 	/**
+	 * Optiunile procesate, memorate pe durata cererii (get_options() e apelat de zeci de ori).
+	 */
+	private static $cache = null;
+
+	/**
+	 * Invalideaza cache-ul (la orice add/update/delete al optiunii).
+	 */
+	public static function flush() {
+		self::$cache = null;
+	}
+
+	/**
 	 * Paleta + setarile implicite (stil MyWebDesign / SaaS premium).
 	 */
 	public static function defaults() {
@@ -24,6 +36,8 @@ class MWD_AS_Defaults {
 			'geo_lookup'       => 0,
 			'exclude_ips'      => '',
 			'exclude_paths'    => '',
+			'retention_days'   => 120, // pastrarea datelor de analitice (30..730 zile)
+			'delete_on_uninstall' => 0, // sterge tabelele + optiunile la dezinstalare
 
 			// Paleta
 			'sidebar_bg'     => '#0f2744', // navy
@@ -90,6 +104,9 @@ class MWD_AS_Defaults {
 	 * Migreaza automat formatul vechi de meniu (plat, fara roluri) la 'default'.
 	 */
 	public static function get_options() {
+		if ( null !== self::$cache ) {
+			return self::$cache;
+		}
 		$saved = get_option( MWD_AS_OPTION, array() );
 		if ( ! is_array( $saved ) ) {
 			$saved = array();
@@ -104,6 +121,7 @@ class MWD_AS_Defaults {
 			}
 		}
 
+		self::$cache = $opts;
 		return $opts;
 	}
 

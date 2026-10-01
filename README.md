@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.0.0
+- **Versiune:** 2.1.0
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,30 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.1.0
+
+**Performanță**
+- Opțiunile pluginului sunt memorate pe durata cererii (înainte: zeci de citiri + procesări per pagină de admin).
+- Rezumatul de analitice: ~18 interogări → 7 (agregare condiționată pe perioada curentă + anterioară într-o singură trecere); `SHOW TABLES` o singură dată per cerere.
+- WooCommerce: vânzările se calculează direct în SQL (tabela de analitice `wc_order_stats`, apoi HPOS, apoi stocarea clasică) în loc să încarce până la 1000 de obiecte `WC_Order` per afișare a dashboard-ului.
+- Cache-ul WooCommerce se golește automat la comandă nouă / schimbare de status / rambursare / stoc, deci cifrele sunt actuale fără a aștepta 5 minute.
+- „Online acum" nu mai face cereri cât timp tab-ul browserului e ascuns și nu mai face o cerere inutilă la încărcare.
+- Exportul CSV de vizitatori rulează pe loturi de 2.000 de rânduri (înainte: până la 50.000 în memorie).
+
+**Dashboard**
+- Grafic de trend interactiv: Vânzări / Comenzi / Vizite / Afișări (o metrică pe rând, fără axe duble), axă Y cu valori rotunde, tooltip la hover, total + variație față de perioada anterioară, tabel accesibil pentru cititoare de ecran; metrica aleasă e reținută.
+- KPI noi: valoare medie comandă și rată de conversie (comenzi / vizite), cu variație.
+- Card „Acum pe site": vizitatori activi (pagină, dispozitiv, țară), actualizat live.
+- Card „Sănătate site": actualizări disponibile, versiune PHP, indexare dezactivată, erori PHP afișate public, lipsă HTTPS.
+- Linkurile de comenzi funcționează și cu HPOS.
+
+**Funcțional / corecturi**
+- Statisticile WooCommerce erau plafonate la 500 de comenzi pe perioadă — magazinele mari vedeau vânzări subestimate. Acum sunt exacte; rambursările-copil sunt excluse.
+- „Stoc redus" ia în calcul doar produsele cu gestiune de stoc activă (include variațiile, cu link la produsul părinte).
+- Cu presetul „Light" (sidebar alb), titlul și cifrele din dashboard erau invizibile — foloseau culoarea sidebar-ului.
+- Retenția datelor de analitice e configurabilă (30–730 zile).
+- Opțiune „Șterge toate datele la dezinstalare" + `uninstall.php` (implicit dezactivată, ca o reinstalare să nu piardă istoricul).
 
 ### 2.0.0
 

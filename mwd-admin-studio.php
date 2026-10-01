@@ -3,7 +3,7 @@
  * Plugin Name:       MWD Admin Studio
  * Plugin URI:        https://mywebdesign.ro/
  * Description:       Reskin SaaS complet al panoului de administrare WordPress: design modern, paleta de comenzi (⌘K), meniu organizat pe sectiuni, manager de meniu/coloane pe roluri, login restilizat, dashboard si analitice.
- * Version:           2.0.0
+ * Version:           2.1.0
  * Author:            Alexandru Raileanu / MyWebDesign.ro
  * Author URI:        https://mywebdesign.ro/
  * Text Domain:       mwd-admin-studio
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MWD_AS_VERSION', '2.0.0' );
+define( 'MWD_AS_VERSION', '2.1.0' );
 define( 'MWD_AS_FILE', __FILE__ );
 define( 'MWD_AS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MWD_AS_URL', plugin_dir_url( __FILE__ ) );
@@ -76,6 +76,11 @@ function mwd_as_init() {
 	// (altfel paginile "blocate" de Guard ar redeveni vizibile cand skin-ul e oprit).
 	( new MWD_AS_Menu() )->hooks();
 	( new MWD_AS_Branding() )->hooks();
+
+	// Datele WooCommerce din dashboard se reimprospateaza imediat la comenzi / stoc noi.
+	if ( MWD_AS_Woo::active() ) {
+		MWD_AS_Woo::cache_hooks();
+	}
 	( new MWD_AS_Columns() )->hooks();
 	( new MWD_AS_Export() )->hooks();
 
@@ -92,6 +97,11 @@ function mwd_as_init() {
 	}
 }
 add_action( 'plugins_loaded', 'mwd_as_init' );
+
+// Cache-ul de optiuni se invalideaza la orice scriere a optiunii.
+add_action( 'add_option_' . MWD_AS_OPTION, array( 'MWD_AS_Defaults', 'flush' ) );
+add_action( 'update_option_' . MWD_AS_OPTION, array( 'MWD_AS_Defaults', 'flush' ) );
+add_action( 'delete_option_' . MWD_AS_OPTION, array( 'MWD_AS_Defaults', 'flush' ) );
 
 /**
  * Creeaza/actualizeaza tabela tracker-ului cand se schimba versiunea (la update fara reactivare).

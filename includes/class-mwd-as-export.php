@@ -91,12 +91,21 @@ class MWD_AS_Export {
 		$out = fopen( 'php://output', 'w' );
 		fputcsv( $out, array( 'Data', 'IP', 'Dispozitiv', 'Browser', 'OS', 'Tara', 'Oras', 'Sursa', 'Pagina intrare', 'Pagini', 'Durata(s)', 'Recurent' ) );
 
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$rows = $wpdb->get_results( "SELECT started_at, ip, device, browser, os, country, city, referrer, entry_url, pageviews, duration, is_returning FROM {$table} ORDER BY started_at DESC LIMIT 50000", ARRAY_A );
-			foreach ( $rows as $r ) {
-				fputcsv( $out, $r );
-			}
+		if ( MWD_AS_Tracker::ready() ) {
+			// In loturi (pe id descrescator), ca exportul sa nu incarce zeci de mii de randuri in memorie.
+			$last  = PHP_INT_MAX;
+			$total = 0;
+			do {
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, started_at, ip, device, browser, os, country, city, referrer, entry_url, pageviews, duration, is_returning FROM {$table} WHERE id < %d ORDER BY id DESC LIMIT 2000", $last ), ARRAY_A );
+				foreach ( $rows as $r ) {
+					$last = (int) $r['id'];
+					unset( $r['id'] );
+					fputcsv( $out, $r );
+				}
+				$total += count( $rows );
+				flush();
+			} while ( count( $rows ) === 2000 && $total < 200000 );
 		}
 		fclose( $out );
 		exit;

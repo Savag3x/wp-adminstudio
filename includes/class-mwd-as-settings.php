@@ -17,6 +17,7 @@ class MWD_AS_Settings {
 		'enabled', 'style_login', 'style_adminbar', 'custom_dashboard', 'collapse_menu', 'auto_group',
 		'menu_accordion', 'hide_separators', 'cmd_palette', 'track_visitors', 'woo_cards', 'anonymize_ip',
 		'geo_lookup', 'hide_wp_version', 'hide_wp_logo', 'hide_notices', 'block_access', 'guard_exempt_admins',
+		'delete_on_uninstall',
 	);
 
 	const COLORS = array( 'sidebar_bg', 'sidebar_text', 'accent', 'accent_hover', 'content_bg', 'link', 'login_bg' );
@@ -131,7 +132,7 @@ class MWD_AS_Settings {
 		foreach ( self::BOOLEANS as $k ) {
 			$out[ $k ] = empty( $post[ $k ] ) ? 0 : 1;
 		}
-		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths' ) ) as $k ) {
+		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths', 'retention_days' ) ) as $k ) {
 			if ( isset( $post[ $k ] ) ) {
 				$out[ $k ] = $post[ $k ];
 			}
@@ -250,6 +251,7 @@ class MWD_AS_Settings {
 		$font         = isset( $in['font'] ) ? (string) $in['font'] : '';
 		$out['font']  = isset( $fonts[ $font ] ) ? $font : $d['font'];
 		$out['radius'] = isset( $in['radius'] ) ? max( 0, min( 28, (int) $in['radius'] ) ) : $d['radius'];
+		$out['retention_days'] = isset( $in['retention_days'] ) ? max( 30, min( 730, (int) $in['retention_days'] ) ) : $d['retention_days'];
 		$out['density']      = isset( $in['density'] ) && 'compact' === $in['density'] ? 'compact' : 'comfortable';
 		$out['login_layout'] = isset( $in['login_layout'] ) && 'center' === $in['login_layout'] ? 'center' : 'split';
 
@@ -960,6 +962,14 @@ class MWD_AS_Settings {
 									$this->switch_row( 'anonymize_ip', 'Anonimizează IP-ul (GDPR)', 'Ultimul octet al IP-ului nu se stochează.', $o['anonymize_ip'] );
 									$this->switch_row( 'geo_lookup', 'Detectează țara / orașul', 'Folosește ip-api.com când Cloudflare nu trimite țara.', $o['geo_lookup'] );
 									?>
+									<div class="mwd-as-field">
+										<label class="mwd-as-label" for="retention_days">Păstrează datele <small>(30–730 zile)</small></label>
+										<select name="retention_days" id="retention_days">
+											<?php foreach ( array( 30, 60, 90, 120, 180, 365, 730 ) as $rd ) : ?>
+												<option value="<?php echo (int) $rd; ?>" <?php selected( (int) $o['retention_days'], $rd ); ?>><?php echo (int) $rd; ?> zile</option>
+											<?php endforeach; ?>
+										</select>
+									</div>
 								</div>
 							</div>
 							<div class="mwd-as-card">
@@ -1079,6 +1089,10 @@ class MWD_AS_Settings {
 										<input type="file" name="mwd_import" accept="application/json,.json" form="mwd-as-import" required />
 										<button type="submit" form="mwd-as-import" class="mwd-as-btn">Importă</button>
 									</div>
+								</div>
+								<div class="mwd-as-card">
+									<h3>Dezinstalare</h3>
+									<?php $this->switch_row( 'delete_on_uninstall', 'Șterge toate datele la dezinstalare', 'Setările, tabelele de analitice și cache-urile se șterg definitiv când pluginul e șters din pagina Plugin-uri.', $o['delete_on_uninstall'] ); ?>
 								</div>
 							</div>
 						</section>

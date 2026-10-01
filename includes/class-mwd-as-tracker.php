@@ -30,6 +30,28 @@ class MWD_AS_Tracker {
 		return self::sessions_table();
 	}
 
+	/**
+	 * Exista tabela de sesiuni? (o singura interogare SHOW TABLES pe cerere, nu una per functie)
+	 */
+	public static function ready() {
+		static $ready = null;
+		if ( null === $ready ) {
+			global $wpdb;
+			$st    = self::sessions_table();
+			$ready = ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $st ) ) === $st );
+		}
+		return $ready;
+	}
+
+	/**
+	 * Cate zile se pastreaza datele (setare, 30..730).
+	 */
+	public static function retention_days() {
+		$o = MWD_AS_Defaults::get_options();
+		$d = isset( $o['retention_days'] ) ? (int) $o['retention_days'] : self::RETENTION_DAYS;
+		return max( 30, min( 730, $d ) );
+	}
+
 	public static function install() {
 		global $wpdb;
 		$charset = $wpdb->get_charset_collate();
@@ -487,7 +509,7 @@ class MWD_AS_Tracker {
 	public static function online_count( $min = 5 ) {
 		global $wpdb;
 		$st = self::sessions_table();
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $st ) ) !== $st ) {
+		if ( ! self::ready() ) {
 			return 0;
 		}
 		$th = gmdate( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - ( (int) $min * 60 ) );
@@ -498,7 +520,7 @@ class MWD_AS_Tracker {
 	public static function online_list( $min = 5, $limit = 8 ) {
 		global $wpdb;
 		$st = self::sessions_table();
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $st ) ) !== $st ) {
+		if ( ! self::ready() ) {
 			return array();
 		}
 		$th = gmdate( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - ( (int) $min * 60 ) );
@@ -527,7 +549,7 @@ class MWD_AS_Tracker {
 
 	public static function cleanup() {
 		global $wpdb;
-		$before = gmdate( 'Y-m-d H:i:s', strtotime( '-' . self::RETENTION_DAYS . ' days' ) );
+		$before = gmdate( 'Y-m-d H:i:s', strtotime( '-' . self::retention_days() . ' days' ) );
 		$s = self::sessions_table();
 		$v = self::views_table();
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -540,7 +562,7 @@ class MWD_AS_Tracker {
 
 	public static function summary( $days = 7 ) {
 		$days   = max( 1, (int) $days );
-		$cached = get_transient( 'mwd_as_an_summary_' . $days );
+		$cached = get_transient( 'mwd_as_an_sum2_' . $days );
 		if ( false !== $cached ) {
 			return $cached;
 		}
@@ -550,62 +572,97 @@ class MWD_AS_Tracker {
 		$vt = self::views_table();
 		$out = self::empty_summary( $days );
 
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $st ) ) !== $st ) {
+		if ( ! self::ready() ) {
 			return $out;
 		}
 
-		$today = current_time( 'Y-m-d 00:00:00' );
-		$dn    = gmdate( 'Y-m-d 00:00:00', strtotime( current_time( 'Y-m-d 00:00:00' ) . ' -' . ( $days - 1 ) . ' days' ) );
+		$today      = current_time( 'Y-m-d 00:00:00' );
+		$dn         = gmdate( 'Y-m-d 00:00:00', strtotime( $today . ' -' . ( $days - 1 ) . ' days' ) );
+		$prev_start = gmdate( 'Y-m-d 00:00:00', strtotime( $today . ' -' . ( 2 * $days - 1 ) . ' days' ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$out['sessions'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s", $dn ) );
-		$out['today']    = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s", $today ) );
-		$out['unique']   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT uid) FROM {$st} WHERE started_at >= %s", $dn ) );
-		$out['returning'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s AND is_returning = 1", $dn ) );
-		$out['views']    = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$vt} WHERE created_at >= %s", $dn ) );
-		$out['avg_time'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT AVG(duration) FROM {$st} WHERE started_at >= %s", $dn ) );
+		// O singura trecere prin sesiuni pentru perioada curenta + cea anterioara (agregare conditionala).
+		$agg = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT
+					SUM(CASE WHEN started_at >= %s THEN 1 ELSE 0 END) AS sessions,
+					SUM(CASE WHEN started_at >= %s THEN 1 ELSE 0 END) AS today,
+					COUNT(DISTINCT CASE WHEN started_at >= %s THEN uid END) AS uniq,
+					SUM(CASE WHEN started_at >= %s AND is_returning = 1 THEN 1 ELSE 0 END) AS returning_s,
+					AVG(CASE WHEN started_at >= %s THEN duration END) AS avg_time,
+					SUM(CASE WHEN started_at >= %s AND pageviews <= 1 THEN 1 ELSE 0 END) AS bounces,
+					SUM(CASE WHEN started_at >= %s AND device = 'desktop' THEN 1 ELSE 0 END) AS d_desktop,
+					SUM(CASE WHEN started_at >= %s AND device = 'mobile' THEN 1 ELSE 0 END) AS d_mobile,
+					SUM(CASE WHEN started_at >= %s AND device = 'tablet' THEN 1 ELSE 0 END) AS d_tablet,
+					SUM(CASE WHEN started_at < %s THEN 1 ELSE 0 END) AS p_sessions,
+					COUNT(DISTINCT CASE WHEN started_at < %s THEN uid END) AS p_uniq,
+					AVG(CASE WHEN started_at < %s THEN duration END) AS p_avg_time,
+					SUM(CASE WHEN started_at < %s AND pageviews <= 1 THEN 1 ELSE 0 END) AS p_bounces
+				 FROM {$st} WHERE started_at >= %s",
+				$dn, $today, $dn, $dn, $dn, $dn, $dn, $dn, $dn, $dn, $dn, $dn, $dn, $prev_start
+			)
+		);
+		$views = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT SUM(CASE WHEN created_at >= %s THEN 1 ELSE 0 END) AS cur, SUM(CASE WHEN created_at < %s THEN 1 ELSE 0 END) AS prev
+				 FROM {$vt} WHERE created_at >= %s",
+				$dn, $dn, $prev_start
+			)
+		);
 
-		$bounces = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s AND pageviews <= 1", $dn ) );
-		$out['bounce'] = $out['sessions'] > 0 ? round( $bounces / $out['sessions'] * 100 ) : 0;
+		$out['sessions']  = (int) ( $agg ? $agg->sessions : 0 );
+		$out['today']     = (int) ( $agg ? $agg->today : 0 );
+		$out['unique']    = (int) ( $agg ? $agg->uniq : 0 );
+		$out['returning'] = (int) ( $agg ? $agg->returning_s : 0 );
+		$out['avg_time']  = (int) ( $agg ? $agg->avg_time : 0 );
+		$out['views']     = (int) ( $views ? $views->cur : 0 );
+		$out['bounce']    = $out['sessions'] > 0 ? (int) round( ( $agg ? $agg->bounces : 0 ) / $out['sessions'] * 100 ) : 0;
+		$out['devices']   = array(
+			'desktop' => (int) ( $agg ? $agg->d_desktop : 0 ),
+			'mobile'  => (int) ( $agg ? $agg->d_mobile : 0 ),
+			'tablet'  => (int) ( $agg ? $agg->d_tablet : 0 ),
+		);
 
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT device, COUNT(*) c FROM {$st} WHERE started_at >= %s GROUP BY device", $dn ) );
-		foreach ( $rows as $r ) {
-			if ( isset( $out['devices'][ $r->device ] ) ) {
-				$out['devices'][ $r->device ] = (int) $r->c;
-			}
-		}
+		$p_sessions  = (int) ( $agg ? $agg->p_sessions : 0 );
+		$out['prev'] = array(
+			'sessions' => $p_sessions,
+			'unique'   => (int) ( $agg ? $agg->p_uniq : 0 ),
+			'views'    => (int) ( $views ? $views->prev : 0 ),
+			'avg_time' => (int) ( $agg ? $agg->p_avg_time : 0 ),
+			'bounce'   => $p_sessions > 0 ? (int) round( ( $agg ? $agg->p_bounces : 0 ) / $p_sessions * 100 ) : 0,
+		);
 
 		$out['pages']     = $wpdb->get_results( $wpdb->prepare( "SELECT url, COUNT(*) c, AVG(duration) t FROM {$vt} WHERE created_at >= %s GROUP BY url ORDER BY c DESC LIMIT 5", $dn ) );
 		$out['sources']   = $wpdb->get_results( $wpdb->prepare( "SELECT referrer, COUNT(*) c FROM {$st} WHERE started_at >= %s AND referrer <> '' GROUP BY referrer ORDER BY c DESC LIMIT 5", $dn ) );
 		$out['countries'] = $wpdb->get_results( $wpdb->prepare( "SELECT country, COUNT(*) c FROM {$st} WHERE started_at >= %s AND country <> '' GROUP BY country ORDER BY c DESC LIMIT 5", $dn ) );
 
-		$series = $wpdb->get_results( $wpdb->prepare( "SELECT DATE(started_at) d, COUNT(*) c FROM {$st} WHERE started_at >= %s GROUP BY DATE(started_at)", $dn ), OBJECT_K );
+		$series  = $wpdb->get_results( $wpdb->prepare( "SELECT DATE(started_at) d, COUNT(*) c FROM {$st} WHERE started_at >= %s GROUP BY DATE(started_at)", $dn ), OBJECT_K );
+		$vseries = $wpdb->get_results( $wpdb->prepare( "SELECT DATE(created_at) d, COUNT(*) c FROM {$vt} WHERE created_at >= %s GROUP BY DATE(created_at)", $dn ), OBJECT_K );
 		// phpcs:enable
+
 		$spark = array();
+		$vspark = array();
+		$labels = array();
 		for ( $i = $days - 1; $i >= 0; $i-- ) {
-			$key     = gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . " -{$i} days" ) );
-			$spark[] = isset( $series[ $key ] ) ? (int) $series[ $key ]->c : 0;
+			$key      = gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . " -{$i} days" ) );
+			$spark[]  = isset( $series[ $key ] ) ? (int) $series[ $key ]->c : 0;
+			$vspark[] = isset( $vseries[ $key ] ) ? (int) $vseries[ $key ]->c : 0;
+			$labels[] = $key;
 		}
-		$out['spark'] = $spark;
+		$out['spark']       = $spark;
+		$out['views_spark'] = $vspark;
+		$out['dates']       = $labels;
 
-		// Perioada anterioara (aceeasi lungime, imediat inainte) pentru comparatie.
-		$prev_start = gmdate( 'Y-m-d 00:00:00', strtotime( current_time( 'Y-m-d 00:00:00' ) . ' -' . ( 2 * $days - 1 ) . ' days' ) );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$out['prev'] = array(
-			'sessions' => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s AND started_at < %s", $prev_start, $dn ) ),
-			'unique'   => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT uid) FROM {$st} WHERE started_at >= %s AND started_at < %s", $prev_start, $dn ) ),
-			'views'    => (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$vt} WHERE created_at >= %s AND created_at < %s", $prev_start, $dn ) ),
-			'avg_time' => (int) $wpdb->get_var( $wpdb->prepare( "SELECT AVG(duration) FROM {$st} WHERE started_at >= %s AND started_at < %s", $prev_start, $dn ) ),
-		);
-		$pbounce = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$st} WHERE started_at >= %s AND started_at < %s AND pageviews <= 1", $prev_start, $dn ) );
-		// phpcs:enable
-		$out['prev']['bounce'] = $out['prev']['sessions'] > 0 ? round( $pbounce / $out['prev']['sessions'] * 100 ) : 0;
-
-		set_transient( 'mwd_as_an_summary_' . $days, $out, 5 * MINUTE_IN_SECONDS );
+		set_transient( 'mwd_as_an_sum2_' . $days, $out, 5 * MINUTE_IN_SECONDS );
 		return $out;
 	}
 
 	private static function empty_summary( $days = 7 ) {
+		$days  = max( 1, (int) $days );
+		$dates = array();
+		for ( $i = $days - 1; $i >= 0; $i-- ) {
+			$dates[] = gmdate( 'Y-m-d', strtotime( current_time( 'Y-m-d' ) . " -{$i} days" ) );
+		}
 		return array(
 			'sessions'  => 0,
 			'today'     => 0,
@@ -619,6 +676,8 @@ class MWD_AS_Tracker {
 			'sources'   => array(),
 			'countries' => array(),
 			'spark'     => array_fill( 0, max( 1, (int) $days ), 0 ),
+			'views_spark' => array_fill( 0, max( 1, (int) $days ), 0 ),
+			'dates'     => $dates,
 			'prev'      => array( 'sessions' => 0, 'unique' => 0, 'views' => 0, 'avg_time' => 0, 'bounce' => 0 ),
 		);
 	}
@@ -662,7 +721,7 @@ class MWD_AS_Tracker {
 	public static function recent_sessions( $days = 7, $limit = 60 ) {
 		global $wpdb;
 		$st = self::sessions_table();
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $st ) ) !== $st ) {
+		if ( ! self::ready() ) {
 			return array();
 		}
 		$dn = gmdate( 'Y-m-d 00:00:00', strtotime( current_time( 'Y-m-d 00:00:00' ) . ' -' . ( max( 1, (int) $days ) - 1 ) . ' days' ) );
