@@ -1,0 +1,218 @@
+/* MWD Admin Studio — pagina de setari */
+.mwd-as-wrap .mwd-as-sub {
+	max-width: 760px;
+	color: #50575e;
+	font-size: 14px;
+}
+
+.mwd-as-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 16px;
+	margin: 20px 0;
+}
+
+.mwd-as-card {
+	background: #fff;
+	border: 1px solid rgba(15, 39, 68, 0.08);
+	border-radius: 12px;
+	padding: 18px 20px;
+	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04);
+}
+.mwd-as-card h2 {
+	margin-top: 0;
+	font-size: 15px;
+	font-weight: 600;
+	padding-bottom: 10px;
+	border-bottom: 1px solid rgba(15, 39, 68, 0.07);
+}
+
+.mwd-as-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 10px 0;
+	cursor: pointer;
+}
+
+.mwd-as-color-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+.mwd-as-color-row label {
+	font-size: 13px;
+}
+
+/* Manager meniu */
+.mwd-as-menu-card {
+	margin-top: 4px;
+}
+.mwd-as-menu-list {
+	margin: 14px 0 0;
+	max-width: 820px;
+}
+.mwd-as-menu-item {
+	background: #fff;
+	border: 1px solid rgba(15, 39, 68, 0.1);
+	border-radius: 10px;
+	padding: 8px 12px;
+	margin-bottom: 8px;
+}
+.mwd-as-menu-main {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.mwd-as-menu-item.ui-sortable-helper {
+	box-shadow: 0 6px 20px rgba(15, 39, 68, 0.15);
+}
+
+/* Toolbar extinde/restrange */
+.mwd-as-menu-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 0 12px;
+	font-size: 12px;
+	color: #8a94a6;
+}
+.mwd-as-menu-toolbar a { text-decoration: none; font-weight: 500; }
+
+/* Buton toggle sub-pagini */
+.mwd-as-toggle-sub {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: auto;
+	background: #f0f2f6;
+	border: 1px solid rgba(15, 39, 68, 0.1);
+	border-radius: 999px;
+	padding: 3px 10px;
+	cursor: pointer;
+	color: #50575e;
+	font-size: 12px;
+	white-space: nowrap;
+}
+.mwd-as-toggle-sub:hover { border-color: var(--mwd-accent, #10b981); color: #0f2744; }
+.mwd-as-sub-count em { font-style: normal; color: var(--mwd-accent, #10b981); font-weight: 600; margin-left: 4px; }
+.mwd-as-toggle-sub .dashicons { transition: transform .15s ease; font-size: 16px; width: 16px; height: 16px; }
+.mwd-as-menu-item:not(.is-collapsed) .mwd-as-toggle-sub .dashicons { transform: rotate(180deg); }
+
+/* Cand are sub-pagini, slug-ul nu mai impinge butonul; il lasam langa label */
+.mwd-as-menu-item.has-subs .mwd-as-slug { margin-left: 0; }
+
+/* Sub-meniuri */
+.mwd-as-menu-item.is-collapsed .mwd-as-submenu { display: none; }
+.mwd-as-submenu {
+	margin: 8px 0 2px;
+	padding: 8px 0 2px 30px;
+	border-top: 1px dashed rgba(15, 39, 68, 0.1);
+	list-style: none;
+}
+.mwd-as-subitem {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 0;
+}
+.mwd-as-sub-arrow {
+	color: #b5bdca;
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+.mwd-as-sub-label {
+	min-width: 140px;
+	font-size: 13px;
+	color: #50575e;
+}
+.mwd-as-subitem .mwd-as-rename {
+	flex: 1;
+	min-width: 140px;
+}
+.mwd-as-drag {
+	cursor: grab;
+	color: #8a94a6;
+}
+.mwd-as-menu-orig {
+	min-width: 150px;
+	font-weight: 600;
+}
+.mwd-as-rename {
+	flex: 1;
+	min-width: 160px;
+}
+.mwd-as-hide {
+	white-space: nowrap;
+	font-size: 13px;
+	color: #50575e;
+}
+.mwd-as-slug {
+	font-size: 11px;
+	color: #8a94a6;
+	background: #f0f2f6;
+	padding: 2px 6px;
+	border-radius: 6px;
+}
+.mwd-as-placeholder {
+	border: 2px dashed var(--mwd-accent, #10b981);
+	border-radius: 10px;
+	height: 44px;
+	margin-bottom: 8px;
+	background: rgba(16, 185, 129, 0.05);
+}
+
+/* Tab-uri roluri in managerul de meniu */
+.mwd-as-role-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 6px 0 4px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid rgba(15, 39, 68, 0.07);
+}
+.mwd-as-role-tab {
+	display: inline-block;
+	padding: 6px 14px;
+	border-radius: 999px;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
+	color: #50575e;
+	background: #f0f2f6;
+	border: 1px solid transparent;
+}
+.mwd-as-role-tab:hover {
+	color: #0f2744;
+}
+.mwd-as-role-tab.is-active {
+	background: var(--mwd-accent, #10b981);
+	color: #fff;
+}
+
+/* Preseturi culori */
+.mwd-as-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 14px; }
+.mwd-as-presets-lbl { font-size: 12px; color: #8a94a6; margin-right: 2px; }
+.mwd-as-preset { font-size: 12px !important; height: auto !important; padding: 3px 10px !important; }
+
+/* Export / config */
+.mwd-as-export-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* Manager coloane */
+.mwd-as-colgroup { margin-top: 12px; }
+.mwd-as-colgroup-h { font-size: 13px; font-weight: 600; color: #0f2744; margin-bottom: 6px; }
+.mwd-as-colgroup-h code { font-size: 11px; color: #8a94a6; background: #f0f2f6; padding: 1px 6px; border-radius: 6px; margin-left: 6px; }
+.mwd-as-colgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 4px 14px; }
+.mwd-as-colitem { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #50575e; }
+
+/* Tab-uri pagina de setari */
+.mwd-as-tabnav { display: flex; flex-wrap: wrap; gap: 2px; margin: 16px 0 20px; border-bottom: 1px solid rgba(15,39,68,.1); }
+.mwd-as-tabbtn { background: none; border: none; border-bottom: 2px solid transparent; padding: 9px 16px; font-size: 13px; font-weight: 600; color: #50575e; cursor: pointer; border-radius: 8px 8px 0 0; }
+.mwd-as-tabbtn:hover { color: #0f2744; background: rgba(15,39,68,.03); }
+.mwd-as-tabbtn.is-active { color: var(--mwd-accent, #10b981); border-bottom-color: var(--mwd-accent, #10b981); }
+
+/* Camp grup in managerul de meniu */
+.mwd-as-group { width: 130px; }
+.mwd-as-subitem .mwd-as-group { display: none; }

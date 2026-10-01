@@ -1,0 +1,235 @@
+/*
+ * MWD Admin Studio — skin admin.
+ * REGULA CRITICA: doar culori, fonturi si border-radius.
+ * NU se seteaza NICIODATA overflow / position / z-index pe
+ * #adminmenuwrap sau #adminmenuback (strica scroll + flyout-uri).
+ */
+
+/* ============ Tipografie globala ============ */
+body.mwd-as-active,
+body.mwd-as-active .wp-core-ui,
+body.mwd-as-active #wpbody-content,
+body.mwd-as-active #adminmenu,
+body.mwd-as-active .wp-admin {
+	font-family: var(--mwd-font);
+}
+
+body.mwd-as-active #wpbody-content {
+	background: var(--mwd-content-bg);
+}
+body.mwd-as-active #wpcontent,
+body.mwd-as-active #wpbody {
+	background: var(--mwd-content-bg);
+}
+
+body.mwd-as-active .wrap h1,
+body.mwd-as-active .wrap h2,
+body.mwd-as-active .wp-heading-inline {
+	font-weight: 600;
+	letter-spacing: -0.01em;
+}
+
+/* ============ Sidebar (DOAR culori / font / radius) ============ */
+body.mwd-as-active #adminmenu,
+body.mwd-as-active #adminmenuback,
+body.mwd-as-active #adminmenuwrap {
+	background: var(--mwd-sidebar-bg);
+}
+
+body.mwd-as-active #adminmenu a {
+	color: var(--mwd-sidebar-text);
+}
+
+body.mwd-as-active #adminmenu div.wp-menu-image:before,
+body.mwd-as-active #adminmenu li.menu-top:hover div.wp-menu-image:before,
+body.mwd-as-active #adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
+	color: var(--mwd-sidebar-text);
+	opacity: 0.85;
+}
+
+/* Hover element top-level */
+body.mwd-as-active #adminmenu li.menu-top:hover,
+body.mwd-as-active #adminmenu li.opensub > a.menu-top,
+body.mwd-as-active #adminmenu li > a.menu-top:focus {
+	background: rgba(255, 255, 255, 0.08);
+	color: #fff;
+}
+body.mwd-as-active #adminmenu li.menu-top:hover a,
+body.mwd-as-active #adminmenu li.menu-top:hover div.wp-menu-image:before {
+	color: #fff;
+}
+
+/* Element activ / curent */
+body.mwd-as-active #adminmenu li.current a.menu-top,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+body.mwd-as-active #adminmenu .wp-menu-arrow div,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu.opensub > a.menu-top {
+	background: var(--mwd-accent);
+	color: #fff;
+}
+body.mwd-as-active #adminmenu li.current div.wp-menu-image:before,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu div.wp-menu-image:before {
+	color: #fff;
+	opacity: 1;
+}
+
+/* Submeniuri – doar culori/font, fara structura */
+body.mwd-as-active #adminmenu .wp-submenu,
+body.mwd-as-active #adminmenu .wp-has-current-submenu .wp-submenu,
+body.mwd-as-active #adminmenu .wp-has-current-submenu.sticky .wp-submenu {
+	background: color-mix(in srgb, var(--mwd-sidebar-bg) 88%, #000);
+}
+body.mwd-as-active #adminmenu .wp-submenu a {
+	color: var(--mwd-sidebar-text);
+}
+body.mwd-as-active #adminmenu .wp-submenu a:hover,
+body.mwd-as-active #adminmenu .wp-submenu a:focus,
+body.mwd-as-active #adminmenu li.current .wp-submenu li.current a {
+	color: #fff;
+}
+body.mwd-as-active #adminmenu .wp-submenu li.current a {
+	color: var(--mwd-accent);
+	font-weight: 600;
+}
+
+/* Bubble notificari */
+body.mwd-as-active #adminmenu .awaiting-mod,
+body.mwd-as-active #adminmenu .update-plugins {
+	background: var(--mwd-accent);
+	color: #fff;
+	border-radius: 10px;
+}
+
+/* Collapse button */
+body.mwd-as-active #collapse-button {
+	color: var(--mwd-sidebar-text);
+}
+
+/* ============ Admin bar ============ */
+body.mwd-as-active #wpadminbar {
+	background: var(--mwd-sidebar-bg);
+}
+body.mwd-as-active #wpadminbar .ab-item,
+body.mwd-as-active #wpadminbar a.ab-item,
+body.mwd-as-active #wpadminbar > #wp-toolbar span.ab-label,
+body.mwd-as-active #wpadminbar > #wp-toolbar span.noticon {
+	color: var(--mwd-sidebar-text);
+}
+body.mwd-as-active #wpadminbar .ab-top-menu > li:hover > .ab-item,
+body.mwd-as-active #wpadminbar .ab-top-menu > li.hover > .ab-item {
+	background: rgba(255, 255, 255, 0.1);
+	color: #fff;
+}
+
+/* ============ Butoane ============ */
+body.mwd-as-active .wp-core-ui .button-primary {
+	background: var(--mwd-accent);
+	border-color: var(--mwd-accent);
+	border-radius: var(--mwd-radius-sm);
+	box-shadow: none;
+	text-shadow: none;
+	font-weight: 600;
+	transition: background .15s ease;
+}
+body.mwd-as-active .wp-core-ui .button-primary:hover,
+body.mwd-as-active .wp-core-ui .button-primary:focus {
+	background: var(--mwd-accent-hover);
+	border-color: var(--mwd-accent-hover);
+}
+body.mwd-as-active .wp-core-ui .button,
+body.mwd-as-active .wp-core-ui .button-secondary {
+	border-radius: var(--mwd-radius-sm);
+}
+
+/* ============ Linkuri ============ */
+body.mwd-as-active a,
+body.mwd-as-active .wp-core-ui a {
+	color: var(--mwd-link);
+}
+body.mwd-as-active a:hover {
+	color: var(--mwd-accent);
+}
+
+/* ============ Carduri / metabox / tabele ============ */
+body.mwd-as-active .postbox,
+body.mwd-as-active .meta-box-sortables .postbox,
+body.mwd-as-active .card,
+body.mwd-as-active .wp-list-table,
+body.mwd-as-active .stuffbox {
+	border-radius: var(--mwd-radius);
+	border-color: rgba(15, 39, 68, 0.08);
+	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04), 0 4px 16px rgba(15, 39, 68, 0.04);
+}
+body.mwd-as-active .postbox .postbox-header {
+	border-top-left-radius: var(--mwd-radius);
+	border-top-right-radius: var(--mwd-radius);
+}
+body.mwd-as-active .wp-list-table thead th,
+body.mwd-as-active .wp-list-table tfoot th {
+	font-weight: 600;
+}
+
+/* ============ Inputuri ============ */
+body.mwd-as-active input[type="text"],
+body.mwd-as-active input[type="search"],
+body.mwd-as-active input[type="email"],
+body.mwd-as-active input[type="url"],
+body.mwd-as-active input[type="password"],
+body.mwd-as-active input[type="number"],
+body.mwd-as-active select,
+body.mwd-as-active textarea {
+	border-radius: var(--mwd-radius-sm);
+	border-color: rgba(15, 39, 68, 0.15);
+}
+body.mwd-as-active input[type="text"]:focus,
+body.mwd-as-active input[type="search"]:focus,
+body.mwd-as-active input[type="email"]:focus,
+body.mwd-as-active input[type="url"]:focus,
+body.mwd-as-active input[type="password"]:focus,
+body.mwd-as-active input[type="number"]:focus,
+body.mwd-as-active select:focus,
+body.mwd-as-active textarea:focus {
+	border-color: var(--mwd-accent);
+	box-shadow: 0 0 0 1px var(--mwd-accent);
+}
+
+/* Checkbox / radio accent */
+body.mwd-as-active input[type="checkbox"]:checked::before {
+	color: var(--mwd-accent);
+}
+body.mwd-as-active input[type="radio"]:checked::before {
+	background: var(--mwd-accent);
+}
+body.mwd-as-active .wp-core-ui input[type="checkbox"]:focus,
+body.mwd-as-active .wp-core-ui input[type="radio"]:focus {
+	border-color: var(--mwd-accent);
+	box-shadow: 0 0 0 1px var(--mwd-accent);
+}
+
+/* Numere tabulare pe valori numerice (in spiritul dashboard-urilor tale) */
+body.mwd-as-active .wp-list-table td,
+body.mwd-as-active .mwd-tabular {
+	font-variant-numeric: tabular-nums;
+}
+
+/* ============ Pagina Analitice ============ */
+body.mwd-as-active .mwd-an-title { font-weight: 600; }
+.mwd-an-period { display: inline-flex; background: #fff; border: 1px solid rgba(15,39,68,.12); border-radius: 999px; padding: 3px; margin: 6px 0 18px; }
+.mwd-an-pbtn { text-decoration: none; font-size: 13px; font-weight: 600; color: #50575e; padding: 6px 14px; border-radius: 999px; }
+body.mwd-as-active .mwd-an-pbtn:hover { color: var(--mwd-sidebar-bg,#0f2744); }
+body.mwd-as-active .mwd-an-pbtn.is-active, body.mwd-as-active .mwd-an-pbtn.is-active:hover { background: var(--mwd-accent,#10b981); color: #fff; }
+.mwd-an-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 22px; }
+.mwd-an-kpi { background: #fff; border: 1px solid rgba(15,39,68,.08); border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(15,39,68,.04); }
+.mwd-an-kpi-l { display: block; font-size: 12px; color: #6b7480; }
+.mwd-an-kpi-v { display: block; font-size: 24px; font-weight: 700; color: #0f2744; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.mwd-an-h2 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+.mwd-an-table { border-radius: 10px; overflow: hidden; }
+.mwd-an-table .num { font-variant-numeric: tabular-nums; }
+.mwd-an-ellip { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mwd-an-tag { background: var(--mwd-accent,#10b981); color: #fff; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+
+/* Badge variatie pe pagina Analitice */
+.mwd-an-kpi .mwd-delta { display: inline-block; font-size: 11px; font-weight: 600; margin-left: 4px; padding: 1px 6px; border-radius: 999px; vertical-align: middle; }
+.mwd-an-kpi .mwd-delta.up { color: #0a7d54; background: rgba(16,185,129,.14); }
+.mwd-an-kpi .mwd-delta.down { color: #c0342b; background: rgba(224,46,46,.12); }
+.mwd-an-kpi .mwd-delta.flat { color: #8a94a6; background: #eef1f6; }

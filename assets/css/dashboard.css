@@ -1,0 +1,292 @@
+/*
+ * MWD Admin Studio — dashboard personalizat.
+ * Foloseste variabilele paletei (cu fallback) ca sa fie coerent cu skin-ul.
+ */
+
+/* Curata panoul de bun venit si titlul implicit, pastreaza grila pentru widget-ul nostru */
+body.index-php .welcome-panel,
+body.index-php #wpbody-content > .wrap > h1.wp-heading-inline,
+body.index-php #wpbody-content > .wrap > h1:first-of-type {
+	display: none !important;
+}
+
+/* Forteaza widget-ul nostru pe toata latimea si scoate "rama" de postbox */
+body.index-php #dashboard-widgets-wrap { padding: 0; margin: 0; }
+body.index-php #dashboard-widgets #postbox-container-1 { width: 100% !important; }
+body.index-php #dashboard-widgets #postbox-container-2,
+body.index-php #dashboard-widgets #postbox-container-3,
+body.index-php #dashboard-widgets #postbox-container-4 { display: none !important; }
+body.index-php #mwd_dashboard.postbox {
+	border: none !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+body.index-php #mwd_dashboard .postbox-header,
+body.index-php #mwd_dashboard .handle-actions,
+body.index-php #mwd_dashboard .hndle,
+body.index-php #mwd_dashboard .toggle-indicator { display: none !important; }
+body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !important; }
+
+.mwd-dash {
+	--a: var(--mwd-accent, #10b981);
+	--nv: var(--mwd-sidebar-bg, #0f2744);
+	--r: var(--mwd-radius, 12px);
+	max-width: 1320px;
+	margin: 16px 20px 24px 2px;
+	font-family: var(--mwd-font, "Outfit", -apple-system, BlinkMacSystemFont, sans-serif);
+}
+
+/* Header */
+.mwd-dash-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 18px;
+	flex-wrap: wrap;
+}
+.mwd-dash-head-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mwd-dash-period {
+	display: inline-flex;
+	background: #fff;
+	border: 1px solid rgba(15, 39, 68, 0.1);
+	border-radius: 999px;
+	padding: 3px;
+}
+.mwd-dash-period-btn {
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: 600;
+	color: #50575e;
+	padding: 5px 12px;
+	border-radius: 999px;
+	line-height: 1;
+}
+.mwd-dash .mwd-dash-period-btn:hover { color: var(--mwd-sidebar-bg, #0f2744); }
+.mwd-dash .mwd-dash-period-btn.is-active,
+.mwd-dash .mwd-dash-period-btn.is-active:hover { background: var(--mwd-accent, #10b981); color: #fff; }
+.mwd-dash-title {
+	font-size: 26px;
+	font-weight: 600;
+	color: var(--nv);
+	margin: 0;
+	letter-spacing: -0.02em;
+	padding: 0;
+}
+.mwd-dash-sub {
+	margin: 4px 0 0;
+	color: #6b7480;
+	font-size: 13px;
+}
+.mwd-dash-btn {
+	background: var(--a);
+	color: #fff !important;
+	text-decoration: none;
+	border-radius: calc(var(--r) - 4px);
+	padding: 9px 18px;
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	transition: opacity .15s ease;
+}
+.mwd-dash-btn:hover { opacity: .9; color: #fff; }
+
+/* Stat cards */
+.mwd-dash-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 14px;
+	margin-bottom: 16px;
+}
+.mwd-dash-stat {
+	display: block;
+	position: relative;
+	background: #fff;
+	border: 1px solid rgba(15, 39, 68, 0.08);
+	border-radius: var(--r);
+	padding: 16px 18px;
+	text-decoration: none;
+	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04), 0 4px 14px rgba(15, 39, 68, 0.04);
+	transition: transform .12s ease, box-shadow .12s ease;
+}
+.mwd-dash-stat:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 2px 4px rgba(15, 39, 68, 0.06), 0 10px 24px rgba(15, 39, 68, 0.08);
+}
+.mwd-dash-stat-ico {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	color: var(--a);
+	opacity: .55;
+}
+.mwd-dash-stat-ico .dashicons { font-size: 22px; width: 22px; height: 22px; }
+.mwd-dash-stat-label {
+	display: block;
+	font-size: 13px;
+	color: #6b7480;
+}
+.mwd-dash-stat-num {
+	display: block;
+	font-size: 30px;
+	font-weight: 700;
+	color: var(--nv);
+	margin-top: 4px;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.02em;
+}
+.mwd-dash-stat-num.is-accent { color: var(--a); }
+
+/* Grid panouri */
+.mwd-dash-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: 14px;
+}
+.mwd-dash-card {
+	background: #fff;
+	border: 1px solid rgba(15, 39, 68, 0.08);
+	border-radius: var(--r);
+	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04);
+	overflow: hidden;
+}
+.mwd-dash-card-h {
+	padding: 13px 16px;
+	border-bottom: 1px solid rgba(15, 39, 68, 0.07);
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--nv);
+}
+
+/* Randuri */
+.mwd-dash-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 11px 16px;
+	border-bottom: 1px solid rgba(15, 39, 68, 0.05);
+	font-size: 13px;
+	color: #50575e;
+	text-decoration: none;
+}
+a.mwd-dash-row:hover { background: rgba(16, 185, 129, 0.05); }
+.mwd-dash-card .mwd-dash-row:last-child { border-bottom: none; }
+.mwd-dash-row-t { color: #2c3340; }
+.mwd-dash-row-x { color: #8a94a6; font-weight: 400; }
+.mwd-dash-row-m { color: #8a94a6; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mwd-dash-badge {
+	background: var(--a);
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 999px;
+	white-space: nowrap;
+}
+.mwd-dash-empty { padding: 14px 16px; color: #8a94a6; font-size: 13px; margin: 0; }
+
+/* Actiuni rapide */
+.mwd-dash-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	padding: 14px 16px;
+}
+.mwd-dash-action {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 12px;
+	border: 1px solid rgba(15, 39, 68, 0.1);
+	border-radius: calc(var(--r) - 4px);
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--nv);
+	text-decoration: none;
+	transition: border-color .12s ease, background .12s ease;
+}
+.mwd-dash-action:hover {
+	border-color: var(--a);
+	background: rgba(16, 185, 129, 0.06);
+	color: var(--nv);
+}
+.mwd-dash-action .dashicons { color: var(--a); font-size: 18px; width: 18px; height: 18px; }
+
+/* ===== WooCommerce card ===== */
+.mwd-dash-woo-hero { padding: 14px 16px 6px; }
+.mwd-dash-woo-alert {
+	display: flex; align-items: center; gap: 10px;
+	background: rgba(16,185,129,.08);
+	border: 1px solid rgba(16,185,129,.25);
+	border-radius: calc(var(--mwd-radius,12px) - 4px);
+	padding: 12px 14px; text-decoration: none; color: var(--mwd-sidebar-bg,#0f2744);
+	font-size: 13px; font-weight: 500;
+}
+.mwd-dash-woo-big {
+	font-size: 26px; font-weight: 700; color: var(--mwd-accent,#10b981);
+	font-variant-numeric: tabular-nums; line-height: 1;
+}
+.mwd-dash-woo-ok {
+	display: flex; align-items: center; gap: 8px;
+	padding: 12px 14px; font-size: 13px; font-weight: 500; color: #50575e;
+	background: #f6f8fb; border-radius: calc(var(--mwd-radius,12px) - 4px);
+}
+.mwd-dash-woo-ok .dashicons { color: var(--mwd-accent,#10b981); }
+
+/* ===== Visitatori card ===== */
+.mwd-dash-vis-top { display: flex; align-items: flex-end; gap: 14px; padding: 14px 16px 4px; }
+.mwd-dash-chart-box { padding: 4px 16px 10px; }
+.mwd-dash-chart { width: 100%; height: 46px; display: block; }
+.mwd-dash-chart .area { fill: var(--mwd-accent,#10b981); opacity: .13; }
+.mwd-dash-chart .line { fill: none; stroke: var(--mwd-accent,#10b981); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.mwd-dash-chart .bar { fill: var(--mwd-accent,#10b981); opacity: .85; }
+.mwd-dash-vis-nums { font-size: 13px; color: #2c3340; }
+.mwd-dash-vis-nums .num { font-size: 20px; font-weight: 700; color: var(--mwd-sidebar-bg,#0f2744); }
+.mwd-dash-muted { color: #8a94a6; font-size: 12px; margin-top: 2px; }
+.mwd-dash-muted .num { font-size: 12px; font-weight: 600; color: #50575e; }
+
+.mwd-dash-dev { padding: 8px 16px 4px; }
+.mwd-dash-dev-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 12px; }
+.mwd-dash-dev-lab { width: 58px; color: #50575e; }
+.mwd-dash-dev-bar { flex: 1; height: 7px; background: #eef1f6; border-radius: 999px; overflow: hidden; }
+.mwd-dash-dev-bar span { display: block; height: 100%; background: var(--mwd-accent,#10b981); border-radius: 999px; }
+.mwd-dash-dev-pct { width: 34px; text-align: right; color: #2c3340; font-weight: 600; }
+
+.mwd-dash-mini-h {
+	padding: 10px 16px 4px; font-size: 11px; font-weight: 600;
+	text-transform: uppercase; letter-spacing: .04em; color: #8a94a6;
+}
+.mwd-dash-ellip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.mwd-dash-row-m.is-zero { color: #e02e2e; font-weight: 700; }
+
+/* ===== Comenzi recente ===== */
+.mwd-dash-ord-right { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.mwd-dash-opill {
+	font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+	background: #eef1f6; color: #50575e;
+}
+.mwd-dash-opill.is-accent { background: var(--mwd-accent,#10b981); color: #fff; }
+
+/* Card link + extra metrics vizitatori */
+.mwd-dash-card-link { float: right; font-size: 12px; font-weight: 500; text-decoration: none; color: var(--mwd-accent,#10b981) !important; }
+.mwd-dash-vis-extra { display: flex; gap: 16px; padding: 2px 16px 10px; font-size: 12px; color: #6b7480; }
+.mwd-dash-vis-extra strong { color: #0f2744; }
+
+/* Badge variatie (delta) */
+.mwd-delta { display: inline-block; font-size: 11px; font-weight: 600; margin-left: 6px; padding: 1px 6px; border-radius: 999px; vertical-align: middle; font-variant-numeric: tabular-nums; }
+.mwd-delta.up { color: #0a7d54; background: rgba(16,185,129,.14); }
+.mwd-delta.down { color: #c0342b; background: rgba(224,46,46,.12); }
+.mwd-delta.flat { color: #8a94a6; background: #eef1f6; }
+.mwd-dash-stat-num + .mwd-delta { margin-top: 2px; }
+
+/* „Online acum" pill */
+.mwd-dash-online { display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid rgba(15,39,68,.1); border-radius: 999px; padding: 6px 13px; font-size: 12px; font-weight: 600; color: #6b7480; }
+.mwd-dash-online.is-live { color: #0f2744; }
+.mwd-dash-online-dot { width: 8px; height: 8px; border-radius: 50%; background: #c3c9d2; flex-shrink: 0; }
+.mwd-dash-online.is-live .mwd-dash-online-dot { background: var(--mwd-accent,#10b981); animation: mwd-pulse 1.8s infinite; }
+@keyframes mwd-pulse {
+	0% { box-shadow: 0 0 0 0 rgba(16,185,129,.5); }
+	70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+	100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}

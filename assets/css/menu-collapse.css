@@ -1,0 +1,17 @@
+/* MWD Admin Studio — secțiuni pliabile în meniul lateral.
+   Doar display pe <li>-uri; nu atingem overflow/position/z-index pe wrap. */
+
+#adminmenu .mwd-sec > a {
+	cursor: pointer;
+}
+#adminmenu .mwd-sec .mwd-more-count {
+	opacity: .55;
+	font-size: 11px;
+}
+#adminmenu .mwd-sec .wp-menu-name::after {
+	content: ' \25B8'; /* ▸ */
+	opacity: .6;
+}
+#adminmenu .mwd-sec.is-open .wp-menu-name::after {
+	content: ' \25BE'; /* ▾ */
+}
