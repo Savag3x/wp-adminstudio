@@ -1,65 +1,215 @@
 /*
- * MWD Admin Studio — pagina de login.
+ * MWD Admin Studio 2 — pagina de login (SaaS).
+ * .mwd-login-split  -> panou de brand in stanga + formular in dreapta
+ * .mwd-login-center -> card centrat pe fundal gradient
  */
 body.login {
 	font-family: var(--mwd-font);
-	background: var(--mwd-login-bg);
+	-webkit-font-smoothing: antialiased;
+	color: #0f172a;
+	background:
+		radial-gradient(1200px 600px at 10% -10%, rgba(var(--mwd-accent-rgb), .35), transparent 60%),
+		radial-gradient(900px 500px at 110% 110%, rgba(var(--mwd-accent-rgb), .22), transparent 60%),
+		var(--mwd-login-bg);
+	min-height: 100vh;
 }
 
+/* ---------- Logo ---------- */
 .login h1 a {
 	color: #fff;
+	margin-bottom: 20px;
 }
 
+/* ---------- Card formular ---------- */
 .login form {
-	border-radius: var(--mwd-radius);
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-	border: none;
-	padding: 30px 24px 28px;
+	padding: 30px 28px 28px;
+	border: 1px solid rgba(15, 23, 42, .06);
+	border-radius: calc(var(--mwd-radius) + 6px);
+	background: #fff;
+	box-shadow: 0 30px 80px -20px rgba(2, 6, 23, .45), 0 0 0 1px rgba(255, 255, 255, .04);
 }
-
+.login label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #334155;
+}
 .login form .input,
 .login input[type="text"],
-.login input[type="password"] {
-	border-radius: calc(var(--mwd-radius) - 4px);
-	border-color: rgba(15, 39, 68, 0.15);
-	padding: 10px 12px;
+.login input[type="password"],
+.login input[type="email"] {
+	margin-top: 6px;
+	padding: 10px 14px;
+	font-size: 15px;
+	border: 1px solid rgba(15, 23, 42, .14);
+	border-radius: calc(var(--mwd-radius) - 2px);
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, .05);
+	transition: border-color .15s ease, box-shadow .15s ease;
 }
 .login form .input:focus,
 .login input[type="text"]:focus,
-.login input[type="password"]:focus {
+.login input[type="password"]:focus,
+.login input[type="email"]:focus {
 	border-color: var(--mwd-accent);
-	box-shadow: 0 0 0 1px var(--mwd-accent);
+	box-shadow: 0 0 0 4px rgba(var(--mwd-accent-rgb), .18);
+	outline: 0;
+}
+.login .button.wp-hide-pw {
+	height: 44px;
+	margin-top: 6px;
+	color: #64748b;
+}
+.login .button.wp-hide-pw:focus {
+	border-color: transparent;
+	box-shadow: none;
+}
+.login .forgetmenot label {
+	font-weight: 500;
+	color: #475569;
 }
 
+/* ---------- Buton principal ---------- */
 .login .button-primary,
 .wp-core-ui .login .button-primary {
-	background: var(--mwd-accent) !important;
-	border-color: var(--mwd-accent) !important;
-	border-radius: calc(var(--mwd-radius) - 4px) !important;
-	text-shadow: none !important;
-	box-shadow: none !important;
-	font-weight: 600;
+	float: none !important;
 	width: 100%;
-	height: 42px;
-	transition: background .15s ease;
+	height: 46px;
+	margin-top: 18px !important;
+	border: 0 !important;
+	border-radius: calc(var(--mwd-radius) - 2px) !important;
+	background: var(--mwd-accent) !important;
+	box-shadow: 0 10px 24px -10px rgba(var(--mwd-accent-rgb), .8), inset 0 1px 0 rgba(255, 255, 255, .18) !important;
+	text-shadow: none !important;
+	font-size: 15px;
+	font-weight: 600;
+	transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
 }
 .login .button-primary:hover,
 .login .button-primary:focus {
 	background: var(--mwd-accent-hover) !important;
-	border-color: var(--mwd-accent-hover) !important;
+	transform: translateY(-1px);
+}
+.login .button-primary:focus {
+	box-shadow: 0 0 0 4px rgba(var(--mwd-accent-rgb), .25) !important;
+}
+.login .forgetmenot {
+	float: none;
+	margin-top: 4px;
 }
 
+/* ---------- Linkuri sub card ---------- */
+.login #nav,
+.login #backtoblog {
+	text-align: center;
+	padding: 0;
+}
 .login #nav a,
-.login #backtoblog a {
-	color: rgba(255, 255, 255, 0.85) !important;
+.login #backtoblog a,
+.login .privacy-policy-page-link a {
+	color: rgba(255, 255, 255, .78) !important;
+	font-size: 13px;
+	text-decoration: none;
 }
 .login #nav a:hover,
 .login #backtoblog a:hover {
 	color: #fff !important;
 }
 
+/* ---------- Mesaje ---------- */
 .login .message,
-.login .success {
-	border-left-color: var(--mwd-accent);
-	border-radius: calc(var(--mwd-radius) - 6px);
+.login .success,
+.login #login_error,
+.login .notice {
+	border: 0;
+	border-left: 4px solid var(--mwd-accent);
+	border-radius: calc(var(--mwd-radius) - 2px);
+	box-shadow: 0 10px 30px -12px rgba(2, 6, 23, .4);
+}
+.login #login_error,
+.login .notice-error {
+	border-left-color: #ef4444;
+}
+
+/* ---------- Selector limba ---------- */
+.login .language-switcher {
+	opacity: .85;
+}
+.login .language-switcher label .dashicons {
+	color: rgba(255, 255, 255, .8);
+}
+
+/* =====================================================
+   Layout „split" (doar pe ecrane late)
+   ===================================================== */
+@media (min-width: 961px) {
+	body.login.mwd-login-split {
+		background: #f8fafc;
+		padding-left: 46%;
+		box-sizing: border-box;
+	}
+
+	/* Panoul de brand */
+	body.login.mwd-login-split::before {
+		content: var(--mwd-login-title);
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 46%;
+		box-sizing: border-box;
+		display: flex;
+		align-items: flex-end;
+		padding: 0 56px 132px;
+		color: #fff;
+		font-size: 34px;
+		font-weight: 700;
+		line-height: 1.15;
+		letter-spacing: -0.03em;
+		background:
+			radial-gradient(800px 500px at 0% 0%, rgba(var(--mwd-accent-rgb), .55), transparent 60%),
+			radial-gradient(700px 500px at 100% 100%, rgba(var(--mwd-accent-rgb), .35), transparent 55%),
+			linear-gradient(160deg, rgba(255, 255, 255, .06), transparent 40%),
+			var(--mwd-login-bg);
+		overflow: hidden;
+	}
+	body.login.mwd-login-split::after {
+		content: var(--mwd-login-tagline);
+		position: fixed;
+		left: 56px;
+		bottom: 64px;
+		width: calc(46% - 112px);
+		color: rgba(255, 255, 255, .72);
+		font-size: 16px;
+		line-height: 1.5;
+	}
+
+	/* Formularul in partea dreapta: fara fundal intunecat */
+	body.login.mwd-login-split #login {
+		padding-top: 12vh;
+		width: 380px;
+	}
+	body.login.mwd-login-split h1 a {
+		filter: none;
+	}
+	body.login.mwd-login-split form {
+		box-shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 20px 50px -24px rgba(15, 23, 42, .25);
+	}
+	body.login.mwd-login-split #nav a,
+	body.login.mwd-login-split #backtoblog a,
+	body.login.mwd-login-split .privacy-policy-page-link a {
+		color: #475569 !important;
+	}
+	body.login.mwd-login-split #nav a:hover,
+	body.login.mwd-login-split #backtoblog a:hover {
+		color: var(--mwd-accent) !important;
+	}
+	body.login.mwd-login-split .language-switcher label .dashicons {
+		color: #64748b;
+	}
+}
+
+/* Centrat: card pe fundal gradient */
+body.login.mwd-login-center #login {
+	width: 360px;
+	padding-top: 10vh;
 }

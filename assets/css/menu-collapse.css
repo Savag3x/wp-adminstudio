@@ -1,17 +1,99 @@
 /* MWD Admin Studio — secțiuni pliabile în meniul lateral.
-   Doar display pe <li>-uri; nu atingem overflow/position/z-index pe wrap. */
+   Doar display / culori / tipografie pe <li>-uri; nu atingem overflow/position/z-index pe wrap. */
 
-#adminmenu .mwd-sec > a {
+/* Evită „pâlpâirea" item-elor grupate până rulează JS-ul. */
+html:not(.mwd-menu-ready) #adminmenu li.mwd-grp:not(.wp-has-current-submenu):not(.current) {
+	display: none;
+}
+
+body #adminmenu li.mwd-sec-hidden {
+	display: none;
+}
+
+body #adminmenu li.mwd-sec > a.menu-top {
 	cursor: pointer;
 }
-#adminmenu .mwd-sec .mwd-more-count {
-	opacity: .55;
-	font-size: 11px;
+
+/* Eticheta secțiunii: mic, uppercase, ca în aplicațiile SaaS */
+body #adminmenu li.mwd-sec .wp-menu-name {
+	font-size: 10.5px;
+	font-weight: 700;
+	letter-spacing: .05em;
+	line-height: 1.35;
+	text-transform: uppercase;
+	opacity: .62;
+	transition: opacity .15s ease;
 }
-#adminmenu .mwd-sec .wp-menu-name::after {
-	content: ' \25B8'; /* ▸ */
-	opacity: .6;
+body #adminmenu li.mwd-sec.is-open .wp-menu-name,
+body #adminmenu li.mwd-sec > a:hover .wp-menu-name,
+body #adminmenu li.mwd-sec > a:focus .wp-menu-name {
+	opacity: 1;
 }
-#adminmenu .mwd-sec.is-open .wp-menu-name::after {
-	content: ' \25BE'; /* ▾ */
+body #adminmenu li.mwd-sec .mwd-sec-count {
+	float: right;
+	min-width: 16px;
+	margin: -1px 4px 0 0;
+	padding: 0 5px;
+	border-radius: 999px;
+	background: rgba(127, 127, 127, .18);
+	font-size: 10px;
+	line-height: 16px;
+	text-align: center;
+	letter-spacing: 0;
+}
+body #adminmenu li.mwd-sec .mwd-sec-chev {
+	float: right;
+	width: 6px;
+	height: 6px;
+	margin: 3px 3px 0 2px;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform-origin: 50% 50%;
+	transform: rotate(-45deg);
+	transition: transform .18s ease;
+}
+body #adminmenu li.mwd-sec.is-open .mwd-sec-chev {
+	transform: rotate(45deg);
+	margin-top: 1px;
+}
+body #adminmenu li.mwd-sec.has-active:not(.is-open) .mwd-sec-label::after {
+	content: '';
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin: 0 0 1px 6px;
+	border-radius: 50%;
+	background: var(--mwd-accent, #10b981);
+	vertical-align: middle;
+}
+body #adminmenu li.mwd-sec > a.menu-top,
+body #adminmenu li.mwd-sec:hover > a.menu-top,
+body #adminmenu li.mwd-sec > a.menu-top:focus,
+body.mwd-as-active #adminmenu li.mwd-sec:hover > a.menu-top,
+body.mwd-as-active #adminmenu li.mwd-sec > a.menu-top:focus {
+	background: transparent;
+	box-shadow: none;
+}
+
+/* Meniu extins: antetul e doar text (fără iconiță), cu spațiu deasupra. */
+@media screen and (min-width: 961px), screen and (max-width: 782px) {
+	body:not(.folded) #adminmenu li.mwd-sec {
+		margin-top: 10px;
+	}
+	body:not(.folded) #adminmenu li.mwd-sec .wp-menu-image {
+		display: none;
+	}
+	body:not(.folded) #adminmenu li.mwd-sec .wp-menu-name {
+		padding: 8px 6px 6px 12px;
+	}
+}
+
+/* Item-ele dintr-o secțiune: ușor indentate */
+@media screen and (min-width: 961px) {
+	body:not(.folded) #adminmenu li.mwd-sec-item > a.menu-top {
+		padding-left: 6px;
+	}
+}
+body #adminmenu li.mwd-sec-last {
+	margin-bottom: 6px;
 }

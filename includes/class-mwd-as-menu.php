@@ -9,6 +9,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class MWD_AS_Menu {
 
+	/**
+	 * Bula de notificari de la finalul unui titlu de meniu. Poate contine span-uri imbricate
+	 * (ex. Comentarii: awaiting-mod > pending-count + screen-reader-text), deci luam tot pana la final.
+	 */
+	const BUBBLE_RE = '#\s*<span[^>]*class="[^"]*(awaiting-mod|update-plugins|plugin-count|menu-counter)[^"]*".*$#s';
+
+	/**
+	 * Titlul fara bula de notificari, ca text simplu.
+	 */
+	public static function strip_bubble( $title ) {
+		return trim( wp_strip_all_tags( preg_replace( self::BUBBLE_RE, '', (string) $title ) ) );
+	}
+
 	public function hooks() {
 		// Reordonare top-level.
 		add_filter( 'custom_menu_order', '__return_true' );
@@ -100,7 +113,7 @@ class MWD_AS_Menu {
 			if ( isset( $data['title'] ) && '' !== trim( $data['title'] ) ) {
 				// Pastreaza span-ul de count daca exista in titlul original.
 				$bubble = '';
-				if ( preg_match( '/<span class="(awaiting-mod|update-plugins|plugin-count)[^"]*">.*?<\/span>/', $item[0], $m ) ) {
+				if ( preg_match( self::BUBBLE_RE, $item[0], $m ) ) {
 					$bubble = ' ' . $m[0];
 				}
 				$menu[ $key ][0] = esc_html( $data['title'] ) . $bubble;

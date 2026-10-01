@@ -36,10 +36,13 @@ class MWD_AS_Defaults {
 			// Tipografie & forma
 			'font'           => 'Outfit',
 			'radius'         => 12, // px
+			'density'        => 'comfortable', // comfortable | compact
 
 			// Branding login
 			'login_logo_url' => '',
 			'login_bg'       => '#0f2744',
+			'login_layout'   => 'split', // split | center
+			'login_tagline'  => '',
 
 			// Rolurile carora li se aplica skin-ul. Gol = toate rolurile.
 			'skin_roles'     => array(),
@@ -54,9 +57,18 @@ class MWD_AS_Defaults {
 			'hide_notices'     => 0,
 			'collapse_menu'    => 1,
 			'auto_group'       => 1,
+			'menu_accordion'   => 0, // o singura sectiune deschisa la un moment dat
+			'hide_separators'  => 1,
+			// Iconite pentru grupuri: eticheta => clasa dashicons.
+			'group_icons'      => array(),
+
+			// Paleta de comenzi (Ctrl/⌘ + K): cautare in meniu, actiuni si continut.
+			'cmd_palette'      => 1,
 
 			// Blocheaza real accesul la paginile ascunse (pe rol)
 			'block_access'     => 1,
+			// Administratorii (manage_options) nu sunt blocati niciodata (anti-lockout).
+			'guard_exempt_admins' => 1,
 
 			// Manager coloane PE ROLURI:
 			// array rol => array( screen_id => array( col_id => 1 ) )  (1 = ascuns)
@@ -188,6 +200,33 @@ class MWD_AS_Defaults {
 	}
 
 	/**
+	 * Iconita (dashicons) pentru un grup de meniu.
+	 */
+	public static function group_icon( $label ) {
+		$opts  = self::get_options();
+		$icons = isset( $opts['group_icons'] ) && is_array( $opts['group_icons'] ) ? $opts['group_icons'] : array();
+		if ( ! empty( $icons[ $label ] ) ) {
+			return $icons[ $label ];
+		}
+		$builtin = array(
+			'Design'          => 'dashicons-layout',
+			'Marketing & SEO' => 'dashicons-megaphone',
+			'Magazin'         => 'dashicons-cart',
+			'Conținut'        => 'dashicons-format-aside',
+			'Sistem'          => 'dashicons-shield',
+		);
+		return isset( $builtin[ $label ] ) ? $builtin[ $label ] : 'dashicons-category';
+	}
+
+	/**
+	 * Are rolul o configurare de meniu proprie (altfel mosteneste 'default')?
+	 */
+	public static function role_has_menu( $role ) {
+		$opts = self::get_options();
+		return 'default' === $role || ( isset( $opts['menu'][ $role ] ) && ! empty( $opts['menu'][ $role ] ) );
+	}
+
+	/**
 	 * Fonturile disponibile: cheie => array(label, google_family|null).
 	 */
 	public static function fonts() {
@@ -196,6 +235,8 @@ class MWD_AS_Defaults {
 			'Inter'              => array( 'Inter', 'Inter:wght@300;400;500;600;700' ),
 			'Poppins'            => array( 'Poppins', 'Poppins:wght@300;400;500;600;700' ),
 			'Plus Jakarta Sans'  => array( 'Plus Jakarta Sans', 'Plus+Jakarta+Sans:wght@300;400;500;600;700' ),
+			'Manrope'            => array( 'Manrope', 'Manrope:wght@400;500;600;700;800' ),
+			'Geist'              => array( 'Geist', 'Geist:wght@300;400;500;600;700' ),
 			'system'             => array( 'System (fara Google Fonts)', null ),
 		);
 	}

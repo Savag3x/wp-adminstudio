@@ -66,8 +66,8 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 .mwd-dash .mwd-dash-period-btn.is-active,
 .mwd-dash .mwd-dash-period-btn.is-active:hover { background: var(--mwd-accent, #10b981); color: #fff; }
 .mwd-dash-title {
-	font-size: 26px;
-	font-weight: 600;
+	font-size: 28px;
+	font-weight: 700;
 	color: var(--nv);
 	margin: 0;
 	letter-spacing: -0.02em;
@@ -115,13 +115,20 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 }
 .mwd-dash-stat-ico {
 	position: absolute;
-	top: 16px;
-	right: 16px;
+	top: 14px;
+	right: 14px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: rgba(var(--mwd-accent-rgb, 16, 185, 129), .1);
 	color: var(--a);
-	opacity: .55;
 }
-.mwd-dash-stat-ico .dashicons { font-size: 22px; width: 22px; height: 22px; }
+.mwd-dash-stat-ico .dashicons { font-size: 19px; width: 19px; height: 19px; }
 .mwd-dash-stat-label {
+	padding-right: 44px;
 	display: block;
 	font-size: 13px;
 	color: #6b7480;
@@ -129,6 +136,7 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 .mwd-dash-stat-num {
 	display: block;
 	font-size: 30px;
+	line-height: 1.15;
 	font-weight: 700;
 	color: var(--nv);
 	margin-top: 4px;
@@ -145,9 +153,9 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 }
 .mwd-dash-card {
 	background: #fff;
-	border: 1px solid rgba(15, 39, 68, 0.08);
+	border: 1px solid rgba(15, 23, 42, 0.08);
 	border-radius: var(--r);
-	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04);
+	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px -4px rgba(15, 23, 42, 0.08);
 	overflow: hidden;
 }
 .mwd-dash-card-h {
@@ -170,7 +178,7 @@ body.index-php #mwd_dashboard .inside { margin: 0 !important; padding: 0 !import
 	color: #50575e;
 	text-decoration: none;
 }
-a.mwd-dash-row:hover { background: rgba(16, 185, 129, 0.05); }
+a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.05); }
 .mwd-dash-card .mwd-dash-row:last-child { border-bottom: none; }
 .mwd-dash-row-t { color: #2c3340; }
 .mwd-dash-row-x { color: #8a94a6; font-weight: 400; }
@@ -208,7 +216,7 @@ a.mwd-dash-row:hover { background: rgba(16, 185, 129, 0.05); }
 }
 .mwd-dash-action:hover {
 	border-color: var(--a);
-	background: rgba(16, 185, 129, 0.06);
+	background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.06);
 	color: var(--nv);
 }
 .mwd-dash-action .dashicons { color: var(--a); font-size: 18px; width: 18px; height: 18px; }
@@ -217,8 +225,8 @@ a.mwd-dash-row:hover { background: rgba(16, 185, 129, 0.05); }
 .mwd-dash-woo-hero { padding: 14px 16px 6px; }
 .mwd-dash-woo-alert {
 	display: flex; align-items: center; gap: 10px;
-	background: rgba(16,185,129,.08);
-	border: 1px solid rgba(16,185,129,.25);
+	background: rgba(var(--mwd-accent-rgb, 16, 185, 129), .08);
+	border: 1px solid rgba(var(--mwd-accent-rgb, 16, 185, 129), .25);
 	border-radius: calc(var(--mwd-radius,12px) - 4px);
 	padding: 12px 14px; text-decoration: none; color: var(--mwd-sidebar-bg,#0f2744);
 	font-size: 13px; font-weight: 500;
@@ -289,4 +297,15 @@ a.mwd-dash-row:hover { background: rgba(16, 185, 129, 0.05); }
 	0% { box-shadow: 0 0 0 0 rgba(16,185,129,.5); }
 	70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
 	100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+
+/* Card header cu link (ex. „Caută ⌘K") */
+.mwd-dash-card-h .mwd-cmdk-kbd {
+	margin-left: 4px;
+	padding: 2px 5px;
+	border-radius: 5px;
+	background: #f1f5f9;
+	border: 1px solid #e2e8f0;
+	color: #64748b;
+	font: 600 10px/1.2 var(--mwd-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }

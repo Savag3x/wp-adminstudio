@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       MWD Admin Studio
  * Plugin URI:        https://mywebdesign.ro/
- * Description:       Reskin complet al panoului de administrare WordPress in stilul MyWebDesign: culori, font, border-radius, pagina de login restilizata si manager de meniu (reordonare / redenumire / ascundere).
- * Version:           1.12.0
+ * Description:       Reskin SaaS complet al panoului de administrare WordPress: design modern, paleta de comenzi (⌘K), meniu organizat pe sectiuni, manager de meniu/coloane pe roluri, login restilizat, dashboard si analitice.
+ * Version:           2.0.0
  * Author:            Alexandru Raileanu / MyWebDesign.ro
  * Author URI:        https://mywebdesign.ro/
  * Text Domain:       mwd-admin-studio
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MWD_AS_VERSION', '1.12.0' );
+define( 'MWD_AS_VERSION', '2.0.0' );
 define( 'MWD_AS_FILE', __FILE__ );
 define( 'MWD_AS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MWD_AS_URL', plugin_dir_url( __FILE__ ) );
@@ -41,6 +41,7 @@ require_once MWD_AS_DIR . 'includes/class-mwd-as-guard.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-columns.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-menucollapse.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-export.php';
+require_once MWD_AS_DIR . 'includes/class-mwd-as-palette.php';
 
 /**
  * Bootstrap.
@@ -53,7 +54,6 @@ function mwd_as_init() {
 
 	if ( ! empty( $options['enabled'] ) ) {
 		( new MWD_AS_Styler() )->hooks();
-		( new MWD_AS_Menu() )->hooks();
 
 		if ( ! empty( $options['style_login'] ) ) {
 			( new MWD_AS_Login() )->hooks();
@@ -72,12 +72,19 @@ function mwd_as_init() {
 	}
 
 	// Module independente de skin (se auto-controleaza prin optiunile lor).
+	// Managerul de meniu ruleaza mereu: ascunderea paginilor nu trebuie sa depinda de skin-ul vizual
+	// (altfel paginile "blocate" de Guard ar redeveni vizibile cand skin-ul e oprit).
+	( new MWD_AS_Menu() )->hooks();
 	( new MWD_AS_Branding() )->hooks();
 	( new MWD_AS_Columns() )->hooks();
 	( new MWD_AS_Export() )->hooks();
 
 	if ( ! empty( $options['collapse_menu'] ) ) {
 		( new MWD_AS_MenuCollapse() )->hooks();
+	}
+
+	if ( ! empty( $options['cmd_palette'] ) ) {
+		( new MWD_AS_Palette() )->hooks();
 	}
 
 	if ( ! empty( $options['block_access'] ) ) {

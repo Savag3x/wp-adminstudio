@@ -182,6 +182,7 @@ class MWD_AS_Dashboard {
 				} else {
 					$this->card_recent_content();
 				}
+				$this->card_actions();
 				?>
 			</div>
 		</div>
@@ -346,16 +347,30 @@ class MWD_AS_Dashboard {
 
 	private function card_actions() {
 		$actions = array(
-			array( 'post-new.php', 'dashicons-edit', 'Articol nou' ),
-			array( 'post-new.php?post_type=page', 'dashicons-admin-page', 'Pagină nouă' ),
-			array( 'media-new.php', 'dashicons-admin-media', 'Încarcă media' ),
-			array( 'edit-comments.php', 'dashicons-admin-comments', 'Comentarii' ),
-			array( 'themes.php', 'dashicons-admin-appearance', 'Aspect' ),
-			array( 'admin.php?page=mwd-admin-studio', 'dashicons-art', 'Admin Studio' ),
+			array( 'post-new.php', 'dashicons-edit', 'Articol nou', 'edit_posts' ),
+			array( 'post-new.php?post_type=page', 'dashicons-admin-page', 'Pagină nouă', 'edit_pages' ),
+			array( 'media-new.php', 'dashicons-admin-media', 'Încarcă media', 'upload_files' ),
+			array( 'edit-comments.php', 'dashicons-admin-comments', 'Comentarii', 'moderate_comments' ),
+			array( 'themes.php', 'dashicons-admin-appearance', 'Aspect', 'switch_themes' ),
+			array( 'admin.php?page=mwd-admin-studio', 'dashicons-art', 'Admin Studio', 'manage_options' ),
 		);
+		$actions = array_filter(
+			$actions,
+			function ( $a ) {
+				return current_user_can( $a[3] );
+			}
+		);
+		if ( ! $actions ) {
+			return;
+		}
+		$opts = MWD_AS_Defaults::get_options();
 		?>
 		<div class="mwd-dash-card">
-			<div class="mwd-dash-card-h">Acțiuni rapide</div>
+			<div class="mwd-dash-card-h">Acțiuni rapide
+				<?php if ( ! empty( $opts['cmd_palette'] ) ) : ?>
+					<a href="#" class="mwd-dash-card-link" data-mwd-cmdk>Caută <kbd class="mwd-cmdk-kbd">⌘K</kbd></a>
+				<?php endif; ?>
+			</div>
 			<div class="mwd-dash-actions">
 				<?php foreach ( $actions as $a ) : ?>
 					<a class="mwd-dash-action" href="<?php echo esc_url( admin_url( $a[0] ) ); ?>"><span class="dashicons <?php echo esc_attr( $a[1] ); ?>"></span><?php echo esc_html( $a[2] ); ?></a>

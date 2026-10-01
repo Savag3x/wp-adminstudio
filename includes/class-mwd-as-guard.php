@@ -21,6 +21,11 @@ class MWD_AS_Guard {
 			return;
 		}
 
+		$opts = MWD_AS_Defaults::get_options();
+		if ( ! empty( $opts['guard_exempt_admins'] ) && current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		global $pagenow;
 		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
@@ -108,6 +113,26 @@ class MWD_AS_Guard {
 				$c[] = $pagenow . '?taxonomy=' . $tax . '&post_type=' . $pt;
 			}
 		}
+		// Editare / creare continut: mapam la lista tipului de continut
+		// (daca "Articole" e ascuns, nici post.php?post=X nu trebuie sa fie accesibil).
+		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ), true ) ) {
+			$type = $pt;
+			if ( '' === $type && isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$type = (string) get_post_type( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			}
+			if ( '' === $type ) {
+				$type = 'post';
+			}
+			$c[] = 'post' === $type ? 'edit.php' : 'edit.php?post_type=' . $type;
+			$c[] = 'post' === $type ? 'post-new.php' : 'post-new.php?post_type=' . $type;
+		}
+		if ( 'term.php' === $pagenow && $tax ) {
+			$c[] = 'edit-tags.php?taxonomy=' . $tax;
+			if ( $pt ) {
+				$c[] = 'edit-tags.php?taxonomy=' . $tax . '&post_type=' . $pt;
+			}
+		}
+
 		if ( '' === $page && '' === $pt && '' === $tax ) {
 			$c[] = $pagenow;
 		}

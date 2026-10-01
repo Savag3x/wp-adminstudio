@@ -1,235 +1,670 @@
 /*
- * MWD Admin Studio — skin admin.
- * REGULA CRITICA: doar culori, fonturi si border-radius.
- * NU se seteaza NICIODATA overflow / position / z-index pe
- * #adminmenuwrap sau #adminmenuback (strica scroll + flyout-uri).
+ * MWD Admin Studio 2 — skin admin SaaS.
+ *
+ * REGULA CRITICA: NU se seteaza NICIODATA overflow / position / z-index pe
+ * #adminmenuwrap sau #adminmenuback (strica scroll-ul + flyout-urile native).
+ * Pe item-ele de meniu folosim doar culori, tipografie, radius, margin/padding.
+ *
+ *  body.mwd-as-active  -> sidebar, bara de admin, font global
+ *  body.mwd-as-ui      -> continut (nu se aplica in editorul de blocuri)
  */
 
-/* ============ Tipografie globala ============ */
+/* =========================================================
+   1. Tipografie globala
+   ========================================================= */
 body.mwd-as-active,
 body.mwd-as-active .wp-core-ui,
-body.mwd-as-active #wpbody-content,
 body.mwd-as-active #adminmenu,
-body.mwd-as-active .wp-admin {
+body.mwd-as-active #wpadminbar *:not(.ab-icon):not([class*="dashicons"]) {
 	font-family: var(--mwd-font);
 }
-
-body.mwd-as-active #wpbody-content {
+body.mwd-as-active {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+body.mwd-as-ui,
+body.mwd-as-ui #wpcontent,
+body.mwd-as-ui #wpbody,
+body.mwd-as-ui #wpbody-content {
 	background: var(--mwd-content-bg);
 }
-body.mwd-as-active #wpcontent,
-body.mwd-as-active #wpbody {
-	background: var(--mwd-content-bg);
+body.mwd-as-ui {
+	color: var(--mwd-text);
 }
 
-body.mwd-as-active .wrap h1,
-body.mwd-as-active .wrap h2,
-body.mwd-as-active .wp-heading-inline {
-	font-weight: 600;
-	letter-spacing: -0.01em;
-}
-
-/* ============ Sidebar (DOAR culori / font / radius) ============ */
+/* =========================================================
+   2. Sidebar
+   ========================================================= */
 body.mwd-as-active #adminmenu,
 body.mwd-as-active #adminmenuback,
 body.mwd-as-active #adminmenuwrap {
 	background: var(--mwd-sidebar-bg);
 }
-
+body.mwd-as-active #adminmenuback {
+	border-right: 1px solid var(--mwd-sidebar-line);
+}
+body.mwd-as-active #adminmenu {
+	margin-top: 14px;
+}
 body.mwd-as-active #adminmenu a {
 	color: var(--mwd-sidebar-text);
 }
-
-body.mwd-as-active #adminmenu div.wp-menu-image:before,
-body.mwd-as-active #adminmenu li.menu-top:hover div.wp-menu-image:before,
-body.mwd-as-active #adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
+body.mwd-as-active #adminmenu .wp-menu-name {
+	font-size: 13.5px;
+	font-weight: 500;
+	letter-spacing: -0.005em;
+}
+body.mwd-as-active #adminmenu div.wp-menu-image:before {
 	color: var(--mwd-sidebar-text);
-	opacity: 0.85;
+	opacity: .7;
+	transition: opacity .15s ease, color .15s ease;
+}
+body.mwd-as-active #adminmenu div.wp-menu-image.svg {
+	opacity: .75;
+}
+body.mwd-as-active #adminmenu a.menu-top {
+	transition: background-color .15s ease, color .15s ease;
 }
 
-/* Hover element top-level */
+/* Hover — WP pune fundalul pe <li>; il mutam pe <a> (stilul „pill"). */
 body.mwd-as-active #adminmenu li.menu-top:hover,
+body.mwd-as-active #adminmenu li.menu-top.opensub {
+	background: transparent;
+}
+body.mwd-as-active #adminmenu li.menu-top:hover > a.menu-top,
 body.mwd-as-active #adminmenu li.opensub > a.menu-top,
 body.mwd-as-active #adminmenu li > a.menu-top:focus {
-	background: rgba(255, 255, 255, 0.08);
-	color: #fff;
+	background: var(--mwd-sidebar-hover);
+	color: var(--mwd-sidebar-strong);
+	box-shadow: none;
 }
-body.mwd-as-active #adminmenu li.menu-top:hover a,
-body.mwd-as-active #adminmenu li.menu-top:hover div.wp-menu-image:before {
-	color: #fff;
-}
-
-/* Element activ / curent */
-body.mwd-as-active #adminmenu li.current a.menu-top,
-body.mwd-as-active #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
-body.mwd-as-active #adminmenu .wp-menu-arrow div,
-body.mwd-as-active #adminmenu li.wp-has-current-submenu.opensub > a.menu-top {
-	background: var(--mwd-accent);
-	color: #fff;
-}
-body.mwd-as-active #adminmenu li.current div.wp-menu-image:before,
-body.mwd-as-active #adminmenu li.wp-has-current-submenu div.wp-menu-image:before {
-	color: #fff;
+body.mwd-as-active #adminmenu li.menu-top:hover div.wp-menu-image:before,
+body.mwd-as-active #adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
+	color: var(--mwd-sidebar-strong);
 	opacity: 1;
 }
 
-/* Submeniuri – doar culori/font, fara structura */
+/* Activ / curent */
+body.mwd-as-active #adminmenu li.current a.menu-top,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu.opensub > a.menu-top,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu:hover > a.menu-top {
+	background: var(--mwd-accent);
+	color: var(--mwd-on-accent);
+	font-weight: 600;
+	box-shadow: 0 6px 16px -6px rgba(var(--mwd-accent-rgb), .7);
+}
+body.mwd-as-active #adminmenu li.current div.wp-menu-image:before,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu div.wp-menu-image:before {
+	color: var(--mwd-on-accent);
+	opacity: 1;
+}
+/* Sageata nativa a item-ului curent: nu se potriveste cu stilul „pill" */
+body.mwd-as-active #adminmenu .wp-menu-arrow,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu .wp-submenu-head + .wp-menu-arrow,
+body.mwd-as-active #adminmenu li.current a.menu-top:after,
+body.mwd-as-active #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu:after {
+	display: none;
+	border: 0;
+}
+body.mwd-as-active #adminmenu li.wp-has-submenu.wp-not-current-submenu.opensub:hover:after,
+body.mwd-as-active #adminmenu li.wp-has-submenu.wp-not-current-submenu:focus-within:after {
+	border-right-color: var(--mwd-sidebar-bg-2);
+}
+
+/* Stil „pill" (item-e rotunjite si inserate) — doar cand meniul e extins. */
+@media screen and (min-width: 961px), screen and (max-width: 782px) {
+	body.mwd-as-active:not(.folded) #adminmenu li.menu-top > a.menu-top {
+		margin: 1px 10px;
+		border-radius: var(--mwd-radius-sm);
+	}
+	body.mwd-as-active:not(.folded) #adminmenu .wp-has-current-submenu .wp-submenu,
+	body.mwd-as-active:not(.folded) #adminmenu .wp-has-current-submenu.opensub .wp-submenu {
+		width: auto; /* 160px nativ + margini ar depasi sidebar-ul */
+		margin: 4px 10px 8px 10px;
+		padding: 4px 0 6px 0;
+		border-radius: var(--mwd-radius-sm);
+	}
+}
+
+/* Sub-meniuri (inline la item-ul curent + flyout la hover) */
 body.mwd-as-active #adminmenu .wp-submenu,
 body.mwd-as-active #adminmenu .wp-has-current-submenu .wp-submenu,
-body.mwd-as-active #adminmenu .wp-has-current-submenu.sticky .wp-submenu {
-	background: color-mix(in srgb, var(--mwd-sidebar-bg) 88%, #000);
+body.mwd-as-active #adminmenu .wp-has-current-submenu.opensub .wp-submenu,
+body.mwd-as-active #adminmenu .wp-has-current-submenu.sticky .wp-submenu,
+body.mwd-as-active #adminmenu a.wp-has-current-submenu:focus + .wp-submenu {
+	background: var(--mwd-sidebar-bg-2);
+}
+body.mwd-as-active #adminmenu .wp-not-current-submenu .wp-submenu,
+body.mwd-as-active.folded #adminmenu .wp-has-current-submenu .wp-submenu {
+	border-radius: 0 var(--mwd-radius-sm) var(--mwd-radius-sm) 0;
+	box-shadow: 0 14px 34px -10px rgba(0, 0, 0, .45);
+	padding: 6px 0;
 }
 body.mwd-as-active #adminmenu .wp-submenu a {
 	color: var(--mwd-sidebar-text);
+	font-size: 13px;
+	opacity: .85;
+	transition: color .12s ease, opacity .12s ease;
 }
 body.mwd-as-active #adminmenu .wp-submenu a:hover,
-body.mwd-as-active #adminmenu .wp-submenu a:focus,
-body.mwd-as-active #adminmenu li.current .wp-submenu li.current a {
-	color: #fff;
+body.mwd-as-active #adminmenu .wp-submenu a:focus {
+	color: var(--mwd-sidebar-strong);
+	opacity: 1;
+	box-shadow: none;
+	background: transparent;
 }
-body.mwd-as-active #adminmenu .wp-submenu li.current a {
-	color: var(--mwd-accent);
+body.mwd-as-active #adminmenu .wp-submenu li.current a,
+body.mwd-as-active #adminmenu .wp-submenu li.current a:hover {
+	color: var(--mwd-sidebar-strong);
+	opacity: 1;
 	font-weight: 600;
 }
+body.mwd-as-active #adminmenu .wp-submenu li.current a::before {
+	content: '';
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	margin: 0 8px 1px -2px;
+	border-radius: 50%;
+	background: var(--mwd-accent);
+	vertical-align: middle;
+}
+body.mwd-as-active #adminmenu .wp-submenu-head,
+body.mwd-as-active #adminmenu .wp-menu-arrow div {
+	background: var(--mwd-sidebar-bg-2);
+	color: var(--mwd-sidebar-strong);
+}
 
-/* Bubble notificari */
+/* Bule de notificari */
 body.mwd-as-active #adminmenu .awaiting-mod,
 body.mwd-as-active #adminmenu .update-plugins {
-	background: var(--mwd-accent);
-	color: #fff;
-	border-radius: 10px;
+	background: rgba(var(--mwd-accent-rgb), .18);
+	color: var(--mwd-sidebar-strong);
+	border-radius: 999px;
+	font-weight: 600;
+	min-width: 18px;
+}
+body.mwd-as-active #adminmenu li.current a .awaiting-mod,
+body.mwd-as-active #adminmenu li a.wp-has-current-submenu .update-plugins {
+	background: rgba(255, 255, 255, .25);
+	color: var(--mwd-on-accent);
 }
 
-/* Collapse button */
+/* Separatoare */
+body.mwd-as-active #adminmenu li.wp-menu-separator {
+	height: 1px;
+	margin: 10px 18px;
+	background: var(--mwd-sidebar-line);
+}
+body.mwd-as-active #adminmenu div.separator {
+	border: 0;
+}
+
+/* Butonul „Restrânge meniul" */
 body.mwd-as-active #collapse-button {
 	color: var(--mwd-sidebar-text);
+	opacity: .6;
+}
+body.mwd-as-active #collapse-button:hover,
+body.mwd-as-active #collapse-button:focus {
+	color: var(--mwd-sidebar-strong);
+	opacity: 1;
 }
 
-/* ============ Admin bar ============ */
+/* Densitate compacta */
+body.mwd-as-active.mwd-as-compact #adminmenu .wp-menu-name {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+body.mwd-as-active.mwd-as-compact #adminmenu div.wp-menu-image:before {
+	padding-top: 5px;
+}
+
+/* =========================================================
+   3. Bara de admin
+   ========================================================= */
 body.mwd-as-active #wpadminbar {
 	background: var(--mwd-sidebar-bg);
+	border-bottom: 1px solid var(--mwd-sidebar-line);
+	box-sizing: border-box;
 }
 body.mwd-as-active #wpadminbar .ab-item,
 body.mwd-as-active #wpadminbar a.ab-item,
 body.mwd-as-active #wpadminbar > #wp-toolbar span.ab-label,
-body.mwd-as-active #wpadminbar > #wp-toolbar span.noticon {
+body.mwd-as-active #wpadminbar > #wp-toolbar span.noticon,
+body.mwd-as-active #wpadminbar .ab-icon:before,
+body.mwd-as-active #wpadminbar .ab-item:before {
 	color: var(--mwd-sidebar-text);
 }
 body.mwd-as-active #wpadminbar .ab-top-menu > li:hover > .ab-item,
-body.mwd-as-active #wpadminbar .ab-top-menu > li.hover > .ab-item {
-	background: rgba(255, 255, 255, 0.1);
-	color: #fff;
+body.mwd-as-active #wpadminbar .ab-top-menu > li.hover > .ab-item,
+body.mwd-as-active #wpadminbar:not(.mobile) .ab-top-menu > li > .ab-item:focus {
+	background: var(--mwd-sidebar-hover);
+	color: var(--mwd-sidebar-strong);
+}
+body.mwd-as-active #wpadminbar .ab-top-menu > li:hover > .ab-item .ab-icon:before,
+body.mwd-as-active #wpadminbar .ab-top-menu > li:hover > .ab-item:before {
+	color: var(--mwd-sidebar-strong);
+}
+body.mwd-as-active #wpadminbar .menupop .ab-sub-wrapper,
+body.mwd-as-active #wpadminbar .shortlink-input {
+	background: var(--mwd-sidebar-bg-2);
+	border-radius: 0 0 var(--mwd-radius-sm) var(--mwd-radius-sm);
+	box-shadow: 0 14px 34px -10px rgba(0, 0, 0, .45);
+}
+body.mwd-as-active #wpadminbar .quicklinks .menupop ul li a,
+body.mwd-as-active #wpadminbar .quicklinks .menupop.hover ul li a {
+	color: var(--mwd-sidebar-text);
+}
+body.mwd-as-active #wpadminbar .quicklinks .menupop ul li a:hover,
+body.mwd-as-active #wpadminbar .quicklinks .menupop ul li a:focus {
+	color: var(--mwd-sidebar-strong);
+}
+body.mwd-as-active #wpadminbar #adminbarsearch:before {
+	color: var(--mwd-sidebar-text);
 }
 
-/* ============ Butoane ============ */
+/* =========================================================
+   4. Antetul paginilor
+   ========================================================= */
+body.mwd-as-ui .wrap {
+	margin-top: 18px;
+}
+body.mwd-as-ui .wrap h1,
+body.mwd-as-ui .wrap > h2:first-child,
+body.mwd-as-ui .wp-heading-inline {
+	font-size: 24px;
+	line-height: 1.3;
+	font-weight: 650;
+	letter-spacing: -0.02em;
+	color: var(--mwd-text);
+}
+body.mwd-as-ui .wrap h2,
+body.mwd-as-ui .wrap h3 {
+	color: var(--mwd-text);
+	letter-spacing: -0.01em;
+}
+body.mwd-as-ui .wrap .page-title-action,
+body.mwd-as-ui .wrap .add-new-h2 {
+	top: -2px;
+	margin-left: 10px;
+	padding: 6px 14px;
+	border: 1px solid var(--mwd-border-strong);
+	border-radius: 999px;
+	background: var(--mwd-surface);
+	color: var(--mwd-text);
+	font-size: 13px;
+	font-weight: 600;
+	box-shadow: var(--mwd-shadow-sm);
+	transition: border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+body.mwd-as-ui .wrap .page-title-action:hover,
+body.mwd-as-ui .wrap .page-title-action:focus {
+	border-color: var(--mwd-accent);
+	color: var(--mwd-accent);
+	background: var(--mwd-surface);
+	box-shadow: var(--mwd-ring);
+}
+body.mwd-as-ui p.description,
+body.mwd-as-ui .description {
+	color: var(--mwd-muted);
+}
+
+/* =========================================================
+   5. Butoane
+   ========================================================= */
+body.mwd-as-ui .wp-core-ui .button,
+body.mwd-as-ui .wp-core-ui .button-secondary,
 body.mwd-as-active .wp-core-ui .button-primary {
+	border-radius: var(--mwd-radius-sm);
+	font-weight: 500;
+	transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+body.mwd-as-ui .wp-core-ui .button,
+body.mwd-as-ui .wp-core-ui .button-secondary {
+	background: var(--mwd-surface);
+	border-color: var(--mwd-border-strong);
+	color: var(--mwd-text);
+	box-shadow: var(--mwd-shadow-sm);
+}
+body.mwd-as-ui .wp-core-ui .button:hover,
+body.mwd-as-ui .wp-core-ui .button-secondary:hover {
+	background: #f8fafc;
+	border-color: rgba(15, 23, 42, .22);
+	color: var(--mwd-text);
+}
+body.mwd-as-ui .wp-core-ui .button:focus,
+body.mwd-as-ui .wp-core-ui .button-secondary:focus {
+	border-color: var(--mwd-accent);
+	box-shadow: var(--mwd-ring);
+	outline: 0;
+}
+body.mwd-as-active .wp-core-ui .button-primary,
+body.mwd-as-ui .wp-core-ui .button-primary {
 	background: var(--mwd-accent);
 	border-color: var(--mwd-accent);
-	border-radius: var(--mwd-radius-sm);
-	box-shadow: none;
-	text-shadow: none;
+	color: var(--mwd-on-accent);
 	font-weight: 600;
-	transition: background .15s ease;
+	text-shadow: none;
+	box-shadow: 0 1px 2px rgba(15, 23, 42, .08), inset 0 1px 0 rgba(255, 255, 255, .14);
 }
 body.mwd-as-active .wp-core-ui .button-primary:hover,
 body.mwd-as-active .wp-core-ui .button-primary:focus {
 	background: var(--mwd-accent-hover);
 	border-color: var(--mwd-accent-hover);
+	color: var(--mwd-on-accent);
 }
-body.mwd-as-active .wp-core-ui .button,
-body.mwd-as-active .wp-core-ui .button-secondary {
-	border-radius: var(--mwd-radius-sm);
+body.mwd-as-active .wp-core-ui .button-primary:focus {
+	box-shadow: var(--mwd-ring);
 }
-
-/* ============ Linkuri ============ */
-body.mwd-as-active a,
-body.mwd-as-active .wp-core-ui a {
+body.mwd-as-ui .wp-core-ui .button-link {
 	color: var(--mwd-link);
 }
-body.mwd-as-active a:hover {
+
+/* =========================================================
+   6. Linkuri
+   ========================================================= */
+/* Specificitate minima (:where) — orice stil de buton / componenta al altui plugin castiga. */
+:where(body.mwd-as-ui #wpbody-content) a {
+	color: var(--mwd-link);
+}
+:where(body.mwd-as-ui #wpbody-content) a:hover,
+:where(body.mwd-as-ui #wpbody-content) a:active {
 	color: var(--mwd-accent);
 }
-
-/* ============ Carduri / metabox / tabele ============ */
-body.mwd-as-active .postbox,
-body.mwd-as-active .meta-box-sortables .postbox,
-body.mwd-as-active .card,
-body.mwd-as-active .wp-list-table,
-body.mwd-as-active .stuffbox {
-	border-radius: var(--mwd-radius);
-	border-color: rgba(15, 39, 68, 0.08);
-	box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04), 0 4px 16px rgba(15, 39, 68, 0.04);
+body.mwd-as-ui .row-actions .trash a,
+body.mwd-as-ui .row-actions .delete a,
+body.mwd-as-ui a.submitdelete {
+	color: #dc2626;
 }
-body.mwd-as-active .postbox .postbox-header {
+
+/* =========================================================
+   7. Carduri / metabox-uri
+   ========================================================= */
+body.mwd-as-ui .postbox,
+body.mwd-as-ui .card,
+body.mwd-as-ui .stuffbox,
+body.mwd-as-ui .welcome-panel,
+body.mwd-as-ui .health-check-body .health-check-accordion,
+body.mwd-as-ui .site-health-progress-wrapper + * {
+	background: var(--mwd-surface);
+	border: 1px solid var(--mwd-border);
+	border-radius: var(--mwd-radius);
+	box-shadow: var(--mwd-shadow);
+}
+body.mwd-as-ui .postbox .postbox-header {
+	border-bottom-color: var(--mwd-border);
 	border-top-left-radius: var(--mwd-radius);
 	border-top-right-radius: var(--mwd-radius);
 }
-body.mwd-as-active .wp-list-table thead th,
-body.mwd-as-active .wp-list-table tfoot th {
+body.mwd-as-ui .postbox .postbox-header .hndle,
+body.mwd-as-ui .postbox .hndle {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--mwd-text);
+}
+body.mwd-as-ui .meta-box-sortables.ui-sortable-helper .postbox,
+body.mwd-as-ui .sortable-placeholder {
+	border-radius: var(--mwd-radius);
+}
+
+/* =========================================================
+   8. Tabele de liste
+   ========================================================= */
+body.mwd-as-ui .wp-list-table,
+body.mwd-as-ui table.widefat {
+	border: 1px solid var(--mwd-border);
+	border-radius: var(--mwd-radius);
+	border-collapse: separate;
+	border-spacing: 0;
+	box-shadow: var(--mwd-shadow);
+	background: var(--mwd-surface);
+}
+body.mwd-as-ui .wp-list-table thead th,
+body.mwd-as-ui .wp-list-table thead td,
+body.mwd-as-ui table.widefat thead th,
+body.mwd-as-ui table.widefat thead td {
+	background: #f8fafc;
+	border-bottom: 1px solid var(--mwd-border);
+	color: var(--mwd-muted);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .02em;
+	padding-top: 11px;
+	padding-bottom: 11px;
+}
+body.mwd-as-ui .wp-list-table thead th a,
+body.mwd-as-ui table.widefat thead th a {
+	color: var(--mwd-muted) !important;
+}
+body.mwd-as-ui .wp-list-table thead tr > :first-child,
+body.mwd-as-ui table.widefat thead tr > :first-child {
+	border-top-left-radius: var(--mwd-radius);
+}
+body.mwd-as-ui .wp-list-table thead tr > :last-child,
+body.mwd-as-ui table.widefat thead tr > :last-child {
+	border-top-right-radius: var(--mwd-radius);
+}
+body.mwd-as-ui .wp-list-table tfoot th,
+body.mwd-as-ui .wp-list-table tfoot td {
+	background: #f8fafc;
+	border-top: 1px solid var(--mwd-border);
+	color: var(--mwd-muted);
+	font-size: 12px;
 	font-weight: 600;
 }
-
-/* ============ Inputuri ============ */
-body.mwd-as-active input[type="text"],
-body.mwd-as-active input[type="search"],
-body.mwd-as-active input[type="email"],
-body.mwd-as-active input[type="url"],
-body.mwd-as-active input[type="password"],
-body.mwd-as-active input[type="number"],
-body.mwd-as-active select,
-body.mwd-as-active textarea {
-	border-radius: var(--mwd-radius-sm);
-	border-color: rgba(15, 39, 68, 0.15);
+body.mwd-as-ui .wp-list-table tfoot tr > :first-child {
+	border-bottom-left-radius: var(--mwd-radius);
 }
-body.mwd-as-active input[type="text"]:focus,
-body.mwd-as-active input[type="search"]:focus,
-body.mwd-as-active input[type="email"]:focus,
-body.mwd-as-active input[type="url"]:focus,
-body.mwd-as-active input[type="password"]:focus,
-body.mwd-as-active input[type="number"]:focus,
-body.mwd-as-active select:focus,
-body.mwd-as-active textarea:focus {
-	border-color: var(--mwd-accent);
-	box-shadow: 0 0 0 1px var(--mwd-accent);
+body.mwd-as-ui .wp-list-table tfoot tr > :last-child {
+	border-bottom-right-radius: var(--mwd-radius);
 }
-
-/* Checkbox / radio accent */
-body.mwd-as-active input[type="checkbox"]:checked::before {
-	color: var(--mwd-accent);
+body.mwd-as-ui .striped > tbody > :nth-child(odd),
+body.mwd-as-ui ul.striped > :nth-child(odd),
+body.mwd-as-ui .alternate {
+	background-color: #fbfcfe;
 }
-body.mwd-as-active input[type="radio"]:checked::before {
-	background: var(--mwd-accent);
+body.mwd-as-ui .wp-list-table tbody tr:hover > * {
+	background-color: rgba(var(--mwd-accent-rgb), .045);
 }
-body.mwd-as-active .wp-core-ui input[type="checkbox"]:focus,
-body.mwd-as-active .wp-core-ui input[type="radio"]:focus {
-	border-color: var(--mwd-accent);
-	box-shadow: 0 0 0 1px var(--mwd-accent);
-}
-
-/* Numere tabulare pe valori numerice (in spiritul dashboard-urilor tale) */
-body.mwd-as-active .wp-list-table td,
-body.mwd-as-active .mwd-tabular {
+body.mwd-as-ui .wp-list-table td,
+body.mwd-as-ui .wp-list-table th {
 	font-variant-numeric: tabular-nums;
 }
+body.mwd-as-ui .wp-list-table .column-title strong a,
+body.mwd-as-ui .wp-list-table .row-title {
+	color: var(--mwd-text) !important;
+	font-weight: 600;
+}
+body.mwd-as-ui .wp-list-table .row-title:hover {
+	color: var(--mwd-accent) !important;
+}
+body.mwd-as-ui.mwd-as-compact .wp-list-table td,
+body.mwd-as-ui.mwd-as-compact .wp-list-table th {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
 
-/* ============ Pagina Analitice ============ */
-body.mwd-as-active .mwd-an-title { font-weight: 600; }
-.mwd-an-period { display: inline-flex; background: #fff; border: 1px solid rgba(15,39,68,.12); border-radius: 999px; padding: 3px; margin: 6px 0 18px; }
-.mwd-an-pbtn { text-decoration: none; font-size: 13px; font-weight: 600; color: #50575e; padding: 6px 14px; border-radius: 999px; }
-body.mwd-as-active .mwd-an-pbtn:hover { color: var(--mwd-sidebar-bg,#0f2744); }
-body.mwd-as-active .mwd-an-pbtn.is-active, body.mwd-as-active .mwd-an-pbtn.is-active:hover { background: var(--mwd-accent,#10b981); color: #fff; }
-.mwd-an-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 22px; }
-.mwd-an-kpi { background: #fff; border: 1px solid rgba(15,39,68,.08); border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(15,39,68,.04); }
-.mwd-an-kpi-l { display: block; font-size: 12px; color: #6b7480; }
-.mwd-an-kpi-v { display: block; font-size: 24px; font-weight: 700; color: #0f2744; margin-top: 4px; font-variant-numeric: tabular-nums; }
-.mwd-an-h2 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
-.mwd-an-table { border-radius: 10px; overflow: hidden; }
+/* Filtre & paginare */
+body.mwd-as-ui .subsubsub {
+	font-size: 13px;
+}
+body.mwd-as-ui .subsubsub a {
+	padding: 3px 8px;
+	border-radius: 999px;
+	color: var(--mwd-text-2) !important;
+}
+body.mwd-as-ui .subsubsub a.current {
+	background: rgba(var(--mwd-accent-rgb), .12);
+	color: var(--mwd-text) !important;
+	font-weight: 600;
+}
+body.mwd-as-ui .subsubsub a .count {
+	color: var(--mwd-muted);
+}
+body.mwd-as-ui .tablenav .tablenav-pages .button,
+body.mwd-as-ui .tablenav .tablenav-pages .tablenav-pages-navspan {
+	min-width: 30px;
+	border-radius: var(--mwd-radius-sm);
+}
+
+/* Tab-uri native (nav-tab) ca segmented control */
+body.mwd-as-ui .nav-tab-wrapper,
+body.mwd-as-ui .wrap h2.nav-tab-wrapper {
+	border-bottom: 1px solid var(--mwd-border);
+}
+body.mwd-as-ui .nav-tab {
+	background: transparent;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	margin-left: 0;
+	margin-right: 4px;
+	padding: 8px 14px;
+	color: var(--mwd-text-2);
+	font-size: 13px;
+	font-weight: 600;
+	border-radius: var(--mwd-radius-sm) var(--mwd-radius-sm) 0 0;
+}
+body.mwd-as-ui .nav-tab:hover {
+	background: rgba(15, 23, 42, .03);
+	color: var(--mwd-text);
+}
+body.mwd-as-ui .nav-tab-active,
+body.mwd-as-ui .nav-tab-active:hover,
+body.mwd-as-ui .nav-tab-active:focus {
+	background: transparent;
+	border-bottom-color: var(--mwd-accent);
+	color: var(--mwd-text);
+}
+
+/* =========================================================
+   9. Formulare
+   ========================================================= */
+body.mwd-as-ui input[type="text"],
+body.mwd-as-ui input[type="search"],
+body.mwd-as-ui input[type="email"],
+body.mwd-as-ui input[type="url"],
+body.mwd-as-ui input[type="password"],
+body.mwd-as-ui input[type="number"],
+body.mwd-as-ui input[type="tel"],
+body.mwd-as-ui input[type="date"],
+body.mwd-as-ui input[type="datetime-local"],
+body.mwd-as-ui select,
+body.mwd-as-ui textarea {
+	border-radius: var(--mwd-radius-sm);
+	border-color: var(--mwd-border-strong);
+	box-shadow: var(--mwd-shadow-sm);
+	transition: border-color .15s ease, box-shadow .15s ease;
+}
+body.mwd-as-ui input[type="text"]:focus,
+body.mwd-as-ui input[type="search"]:focus,
+body.mwd-as-ui input[type="email"]:focus,
+body.mwd-as-ui input[type="url"]:focus,
+body.mwd-as-ui input[type="password"]:focus,
+body.mwd-as-ui input[type="number"]:focus,
+body.mwd-as-ui input[type="tel"]:focus,
+body.mwd-as-ui input[type="date"]:focus,
+body.mwd-as-ui input[type="datetime-local"]:focus,
+body.mwd-as-ui select:focus,
+body.mwd-as-ui textarea:focus {
+	border-color: var(--mwd-accent);
+	box-shadow: var(--mwd-ring);
+	outline: 0;
+}
+body.mwd-as-ui input[type="checkbox"],
+body.mwd-as-ui input[type="radio"] {
+	border-color: rgba(15, 23, 42, .25);
+}
+body.mwd-as-ui input[type="checkbox"] {
+	border-radius: 5px;
+}
+body.mwd-as-ui input[type="checkbox"]:checked {
+	background: var(--mwd-accent);
+	border-color: var(--mwd-accent);
+}
+body.mwd-as-ui input[type="checkbox"]:checked::before {
+	content: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2020%2020%27%3E%3Cpath%20d%3D%27M14.83%204.89l1.34.94-5.81%208.38H9.02L5.78%209.67l1.34-1.25%202.57%202.4z%27%20fill%3D%27%23ffffff%27%2F%3E%3C%2Fsvg%3E");
+}
+body.mwd-as-ui input[type="radio"]:checked::before {
+	background: var(--mwd-accent);
+}
+body.mwd-as-ui input[type="checkbox"]:focus,
+body.mwd-as-ui input[type="radio"]:focus {
+	border-color: var(--mwd-accent);
+	box-shadow: var(--mwd-ring);
+}
+body.mwd-as-ui .form-table th {
+	font-weight: 600;
+	color: var(--mwd-text);
+}
+
+/* =========================================================
+   10. Notificari
+   ========================================================= */
+body.mwd-as-ui .notice,
+body.mwd-as-ui div.updated,
+body.mwd-as-ui div.error,
+body.mwd-as-ui .update-nag {
+	border: 1px solid var(--mwd-border);
+	border-left-width: 4px;
+	border-radius: var(--mwd-radius-sm);
+	box-shadow: var(--mwd-shadow-sm);
+	background: var(--mwd-surface);
+}
+body.mwd-as-ui .notice-success,
+body.mwd-as-ui div.updated {
+	border-left-color: #10b981;
+}
+body.mwd-as-ui .notice-error,
+body.mwd-as-ui div.error {
+	border-left-color: #ef4444;
+}
+body.mwd-as-ui .notice-warning {
+	border-left-color: #f59e0b;
+}
+body.mwd-as-ui .notice-info {
+	border-left-color: #3b82f6;
+}
+
+/* Screen options / Ajutor */
+body.mwd-as-ui #screen-meta-links .show-settings {
+	border: 1px solid var(--mwd-border);
+	border-top: 0;
+	border-radius: 0 0 var(--mwd-radius-sm) var(--mwd-radius-sm);
+	background: var(--mwd-surface);
+	color: var(--mwd-text-2);
+	box-shadow: var(--mwd-shadow-sm);
+}
+body.mwd-as-ui #screen-meta {
+	border-color: var(--mwd-border);
+	border-radius: 0 0 var(--mwd-radius) var(--mwd-radius);
+	box-shadow: var(--mwd-shadow);
+}
+
+/* Footer admin */
+body.mwd-as-ui #wpfooter {
+	color: var(--mwd-muted);
+}
+
+/* =========================================================
+   11. Pagina Analitice
+   ========================================================= */
+body.mwd-as-active .mwd-an-title { font-weight: 650; }
+.mwd-an-period { display: inline-flex; background: #fff; border: 1px solid rgba(15,23,42,.1); border-radius: 999px; padding: 3px; margin: 6px 0 18px; box-shadow: 0 1px 2px rgba(15,23,42,.05); }
+.mwd-an-pbtn { text-decoration: none; font-size: 13px; font-weight: 600; color: #475569; padding: 6px 14px; border-radius: 999px; }
+body.mwd-as-active .mwd-an-pbtn:hover { color: #0f172a; }
+body.mwd-as-active .mwd-an-pbtn.is-active, body.mwd-as-active .mwd-an-pbtn.is-active:hover { background: var(--mwd-accent,#10b981); color: var(--mwd-on-accent, #fff); }
+.mwd-an-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin-bottom: 22px; }
+.mwd-an-kpi { background: #fff; border: 1px solid rgba(15,23,42,.08); border-radius: var(--mwd-radius, 12px); padding: 16px 18px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 16px -4px rgba(15,23,42,.08); }
+.mwd-an-kpi-l { display: block; font-size: 12px; font-weight: 500; color: #64748b; }
+.mwd-an-kpi-v { display: block; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.mwd-an-h2 { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
 .mwd-an-table .num { font-variant-numeric: tabular-nums; }
 .mwd-an-ellip { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mwd-an-tag { background: var(--mwd-accent,#10b981); color: #fff; font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.mwd-an-tag { background: rgba(var(--mwd-accent-rgb, 16,185,129), .14); color: #0f172a; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
 
-/* Badge variatie pe pagina Analitice */
-.mwd-an-kpi .mwd-delta { display: inline-block; font-size: 11px; font-weight: 600; margin-left: 4px; padding: 1px 6px; border-radius: 999px; vertical-align: middle; }
-.mwd-an-kpi .mwd-delta.up { color: #0a7d54; background: rgba(16,185,129,.14); }
-.mwd-an-kpi .mwd-delta.down { color: #c0342b; background: rgba(224,46,46,.12); }
-.mwd-an-kpi .mwd-delta.flat { color: #8a94a6; background: #eef1f6; }
+.mwd-an-kpi .mwd-delta { display: inline-block; font-size: 11px; font-weight: 600; margin-left: 4px; padding: 2px 7px; border-radius: 999px; vertical-align: middle; letter-spacing: 0; }
+.mwd-an-kpi .mwd-delta.up { color: #047857; background: rgba(16,185,129,.12); }
+.mwd-an-kpi .mwd-delta.down { color: #b91c1c; background: rgba(239,68,68,.1); }
+.mwd-an-kpi .mwd-delta.flat { color: #64748b; background: #f1f5f9; }

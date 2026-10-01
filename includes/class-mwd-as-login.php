@@ -12,6 +12,23 @@ class MWD_AS_Login {
 		add_action( 'login_enqueue_scripts', array( $this, 'enqueue' ), 99 );
 		add_filter( 'login_headerurl', array( $this, 'logo_url' ) );
 		add_filter( 'login_headertext', array( $this, 'logo_text' ) );
+		add_filter( 'login_body_class', array( $this, 'body_class' ) );
+	}
+
+	public function body_class( $classes ) {
+		$opts      = MWD_AS_Defaults::get_options();
+		$classes[] = 'mwd-login';
+		$classes[] = 'split' === $opts['login_layout'] ? 'mwd-login-split' : 'mwd-login-center';
+		return $classes;
+	}
+
+	/**
+	 * Text sigur pentru `content:` in CSS (string intre ghilimele).
+	 */
+	private function css_string( $text ) {
+		$text = wp_strip_all_tags( (string) $text );
+		$text = str_replace( array( '\\', '"', "\r", "\n", '<', '>' ), array( '\\\\', '\\"', ' ', ' ', '', '' ), $text );
+		return '"' . $text . '"';
 	}
 
 	public function logo_url() {
@@ -58,12 +75,24 @@ class MWD_AS_Login {
 		$css .= '--mwd-login-bg:' . $bg . ';';
 		$css .= '--mwd-radius:' . $radius . 'px;';
 		$css .= '--mwd-font:' . $font_stack . ';';
+		$css .= '--mwd-accent-rgb:' . $this->rgb( $accent ) . ';';
+		$tagline = '' !== trim( (string) $opts['login_tagline'] ) ? $opts['login_tagline'] : get_bloginfo( 'description' );
+		$css .= '--mwd-login-title:' . $this->css_string( get_bloginfo( 'name' ) ) . ';';
+		$css .= '--mwd-login-tagline:' . $this->css_string( $tagline ) . ';';
 		$css .= '}';
 
 		if ( $logo ) {
-			$css .= '.login h1 a{background-image:url(' . $logo . ') !important;background-size:contain !important;width:100% !important;height:64px !important;}';
+			$css .= '.login h1 a{background-image:url("' . str_replace( array( '"', '\\', '<', '>', ')' ), array( '%22', '%5C', '%3C', '%3E', '%29' ), $logo ) . '") !important;background-size:contain !important;background-position:center !important;width:100% !important;height:64px !important;}';
 		}
 
 		wp_add_inline_style( 'mwd-as-login', $css );
+	}
+
+	private function rgb( $hex ) {
+		$hex = ltrim( $hex, '#' );
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		return hexdec( substr( $hex, 0, 2 ) ) . ',' . hexdec( substr( $hex, 2, 2 ) ) . ',' . hexdec( substr( $hex, 4, 2 ) );
 	}
 }

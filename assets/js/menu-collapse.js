@@ -1,4 +1,6 @@
-/* MWD Admin Studio — meniu lateral organizat pe secțiuni pliabile */
+/* MWD Admin Studio — meniu lateral organizat pe secțiuni pliabile.
+ * Doar mutare de <li> + clase; nu atinge #adminmenuwrap / #adminmenuback.
+ */
 (function () {
 	'use strict';
 	var cfg = window.MWDMenuCollapse;
@@ -8,81 +10,148 @@
 
 	var essentials = cfg.essentials || [];
 	var groups = cfg.groups || [];
+	var anchor = document.getElementById( 'collapse-menu' ); // butonul „Restrânge meniul" rămâne ultimul
+	var sections = [];
+
+	/* ---------- Stare persistentă (per utilizator) ---------- */
+	function loadState() {
+		try { return JSON.parse( window.localStorage.getItem( cfg.storageKey ) || '{}' ) || {}; } catch ( e ) { return {}; }
+	}
+	function saveState( st ) {
+		try { window.localStorage.setItem( cfg.storageKey, JSON.stringify( st ) ); } catch ( e ) {}
+	}
+	var state = loadState();
 
 	function isEssential( li ) {
 		return li.id && essentials.indexOf( li.id ) !== -1;
 	}
 	function isActive( li ) {
-		if ( li.classList && ( li.classList.contains( 'current' ) || li.classList.contains( 'wp-has-current-submenu' ) ) ) {
-			return true;
-		}
-		return !! li.querySelector( '.current' );
+		return li.classList.contains( 'current' ) || li.classList.contains( 'wp-has-current-submenu' ) || !! li.querySelector( '.current' );
 	}
 	function groupKeyOf( li ) {
 		for ( var i = 0; i < groups.length; i++ ) {
-			if ( li.className.indexOf( groups[i].key ) !== -1 ) { return groups[i].key; }
+			if ( li.classList.contains( groups[i].key ) ) { return groups[i].key; }
 		}
 		return '';
 	}
-
-	var items = [];
-	var children = menu.children;
-	for ( var i = 0; i < children.length; i++ ) {
-		var c = children[i];
-		if ( c.tagName === 'LI' && c.className.indexOf( 'menu-top' ) !== -1 &&
-			c.className.indexOf( 'wp-menu-separator' ) === -1 &&
-			c.className.indexOf( 'mwd-sec' ) === -1 ) {
-			items.push( c );
-		}
+	function insert( node, before ) {
+		if ( before && before.parentNode === menu ) { menu.insertBefore( node, before ); }
+		else { menu.appendChild( node ); }
 	}
 
+	/* ---------- Colectare item-e ---------- */
+	var items = [];
+	Array.prototype.forEach.call( menu.children, function ( c ) {
+		if ( c.tagName === 'LI' && c.classList.contains( 'menu-top' ) && ! c.classList.contains( 'wp-menu-separator' ) && c.id !== 'collapse-menu' ) {
+			items.push( c );
+		}
+	} );
+
 	var buckets = {};
-	groups.forEach( function ( g ) { buckets[g.key] = []; } );
+	groups.forEach( function ( g ) { buckets[ g.key ] = []; } );
 	var more = [];
 
 	items.forEach( function ( li ) {
 		var gk = groupKeyOf( li );
-		if ( gk ) { buckets[gk].push( li ); return; }
-		if ( isEssential( li ) ) { return; }
-		more.push( li );
-	});
+		if ( gk ) { buckets[ gk ].push( li ); return; }
+		if ( ! isEssential( li ) ) { more.push( li ); }
+	} );
 
-	function makeSection( key, label, list ) {
+	/* ---------- Construire secțiune ---------- */
+	function makeSection( key, label, icon, list, before ) {
 		if ( ! list.length ) { return; }
+
 		var header = document.createElement( 'li' );
 		header.className = 'menu-top mwd-sec';
-		header.innerHTML = '<a href="#" class="menu-top">' +
-			'<div class="wp-menu-image dashicons-before dashicons-menu-alt3"></div>' +
-			'<div class="wp-menu-name">' + label + ' <span class="mwd-more-count">' + list.length + '</span></div></a>';
-		menu.appendChild( header );
+		header.setAttribute( 'data-mwd-sec', key );
+
+		var a = document.createElement( 'a' );
+		a.href = '#';
+		a.className = 'menu-top mwd-sec-toggle';
+		a.setAttribute( 'role', 'button' );
+
+		var img = document.createElement( 'div' );
+		img.className = 'wp-menu-image dashicons-before ' + ( icon || 'dashicons-category' );
+		img.setAttribute( 'aria-hidden', 'true' );
+
+		var name = document.createElement( 'div' );
+		name.className = 'wp-menu-name';
+		var lab = document.createElement( 'span' );
+		lab.className = 'mwd-sec-label';
+		lab.textContent = label;
+		var cnt = document.createElement( 'span' );
+		cnt.className = 'mwd-sec-count';
+		cnt.textContent = list.length;
+		var chev = document.createElement( 'span' );
+		chev.className = 'mwd-sec-chev';
+		chev.setAttribute( 'aria-hidden', 'true' );
+		// Elementele flotante (dreapta) înaintea textului, ca să stea pe primul rând.
+		name.appendChild( chev );
+		name.appendChild( cnt );
+		name.appendChild( lab );
+
+		a.appendChild( img );
+		a.appendChild( name );
+		header.appendChild( a );
+		insert( header, before );
 
 		var active = false;
+		var last = header;
 		list.forEach( function ( li ) {
+			li.classList.add( 'mwd-sec-item' );
 			li.setAttribute( 'data-mwd-sec', key );
-			menu.appendChild( li );
+			insert( li, last.nextSibling || anchor );
+			last = li;
 			if ( isActive( li ) ) { active = true; }
-		});
+		} );
+		if ( list.length ) { list[ list.length - 1 ].classList.add( 'mwd-sec-last' ); }
 
-		// Pornesc mereu închise; se deschide doar grupul paginii curente.
-		function apply( o ) {
-			list.forEach( function ( li ) { li.style.display = o ? '' : 'none'; } );
-			if ( o ) { header.className += ' is-open'; }
-			else { header.className = header.className.replace( /\s*is-open/g, '' ); }
-		}
-		apply( active );
+		var sec = { key: key, header: header, link: a, list: list, active: active };
+		sections.push( sec );
 
-		header.querySelector( 'a' ).addEventListener( 'click', function ( e ) {
+		var open = active || ( typeof state[ key ] === 'boolean' ? state[ key ] : false );
+		apply( sec, open );
+
+		a.addEventListener( 'click', function ( e ) {
 			e.preventDefault();
-			apply( header.className.indexOf( 'is-open' ) === -1 );
-		});
+			toggle( sec );
+		} );
 	}
 
-	groups.forEach( function ( g ) {
-		makeSection( g.key, g.label, buckets[g.key] );
-	});
+	function apply( sec, open ) {
+		sec.open = open;
+		sec.header.classList.toggle( 'is-open', open );
+		sec.header.classList.toggle( 'has-active', sec.active );
+		sec.link.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
+		sec.list.forEach( function ( li ) { li.classList.toggle( 'mwd-sec-hidden', ! open ); } );
+	}
 
+	function toggle( sec ) {
+		var open = ! sec.open;
+		if ( open && cfg.accordion ) {
+			sections.forEach( function ( s ) {
+				if ( s !== sec && s.open && ! s.active ) {
+					apply( s, false );
+					state[ s.key ] = false;
+				}
+			} );
+		}
+		apply( sec, open );
+		state[ sec.key ] = open;
+		saveState( state );
+	}
+
+	// Grupurile apar în poziția primului lor element (respectă ordinea din manager).
+	groups.forEach( function ( g ) {
+		var list = buckets[ g.key ];
+		if ( list.length ) { makeSection( g.key, g.label, g.icon, list, list[0] ); }
+	} );
+
+	// „Mai multe" = restul elementelor ne-esențiale, la final (înainte de „Restrânge meniul").
 	var threshold = groups.length ? 1 : 3;
 	if ( more.length >= threshold ) {
-		makeSection( 'more', cfg.label, more );
+		makeSection( 'more', cfg.label, 'dashicons-ellipsis', more, anchor );
 	}
+
+	document.documentElement.classList.add( 'mwd-menu-ready' );
 })();

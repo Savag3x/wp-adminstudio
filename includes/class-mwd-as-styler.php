@@ -20,7 +20,19 @@ class MWD_AS_Styler {
 		if ( ! $this->applies() ) {
 			return $classes;
 		}
-		return $classes . ' mwd-as-active';
+		$opts    = MWD_AS_Defaults::get_options();
+		$classes .= ' mwd-as-active';
+
+		// Stilurile de continut (inputuri, linkuri, tabele) nu se aplica in editorul de blocuri,
+		// care are propriul design system.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! ( $screen && method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() ) ) {
+			$classes .= ' mwd-as-ui';
+		}
+		if ( isset( $opts['density'] ) && 'compact' === $opts['density'] ) {
+			$classes .= ' mwd-as-compact';
+		}
+		return $classes;
 	}
 
 	/**
@@ -74,8 +86,17 @@ class MWD_AS_Styler {
 
 		$radius = (int) $opts['radius'];
 
+		$accent  = $this->color( $opts['accent'] );
+		$sidebar = $this->color( $opts['sidebar_bg'] );
+
 		$vars = array(
-			'--mwd-sidebar-bg'    => $this->color( $opts['sidebar_bg'] ),
+			'--mwd-sidebar-bg'    => $sidebar,
+			'--mwd-sidebar-bg-2'  => $this->shade( $sidebar, -0.18 ),
+			'--mwd-sidebar-line'  => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.07)' : 'rgba(15,23,42,.08)',
+			'--mwd-sidebar-hover' => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.07)' : 'rgba(15,23,42,.05)',
+			'--mwd-sidebar-strong' => self::is_dark( $sidebar ) ? '#ffffff' : '#0f172a',
+			'--mwd-accent-rgb'    => $this->rgb( $accent ),
+			'--mwd-on-accent'     => self::is_dark( $accent ) ? '#ffffff' : '#0f172a',
 			'--mwd-sidebar-text'  => $this->color( $opts['sidebar_text'] ),
 			'--mwd-accent'        => $this->color( $opts['accent'] ),
 			'--mwd-accent-hover'  => $this->color( $opts['accent_hover'] ),
@@ -87,6 +108,13 @@ class MWD_AS_Styler {
 		);
 
 		$css = ':root{';
+		// Tokens de design (fixe) pentru aspectul SaaS.
+		$css .= '--mwd-surface:#ffffff;--mwd-text:#0f172a;--mwd-text-2:#475569;--mwd-muted:#64748b;'
+			. '--mwd-border:rgba(15,23,42,.08);--mwd-border-strong:rgba(15,23,42,.14);'
+			. '--mwd-shadow-sm:0 1px 2px rgba(15,23,42,.05);'
+			. '--mwd-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px -4px rgba(15,23,42,.08);'
+			. '--mwd-shadow-lg:0 12px 40px -12px rgba(15,23,42,.25);'
+			. '--mwd-ring:0 0 0 3px rgba(var(--mwd-accent-rgb),.22);';
 		foreach ( $vars as $k => $v ) {
 			$css .= $k . ':' . $v . ';';
 		}
@@ -98,6 +126,51 @@ class MWD_AS_Styler {
 		}
 
 		return $css;
+	}
+
+	/**
+	 * "r,g,b" dintr-o culoare hex (pentru rgba( var(--mwd-accent-rgb), .x )).
+	 */
+	private function rgb( $hex ) {
+		$c = self::hex_parts( $hex );
+		return $c ? implode( ',', $c ) : '16,185,129';
+	}
+
+	/**
+	 * Lumineaza (+) / intuneca (-) o culoare hex cu un factor 0..1.
+	 */
+	private function shade( $hex, $f ) {
+		$c = self::hex_parts( $hex );
+		if ( ! $c ) {
+			return $hex;
+		}
+		foreach ( $c as $i => $v ) {
+			$c[ $i ] = (int) round( $f < 0 ? $v * ( 1 + $f ) : $v + ( 255 - $v ) * $f );
+		}
+		return sprintf( '#%02x%02x%02x', $c[0], $c[1], $c[2] );
+	}
+
+	private static function hex_parts( $hex ) {
+		$hex = ltrim( (string) $hex, '#' );
+		if ( 3 === strlen( $hex ) ) {
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+		if ( ! preg_match( '/^[0-9a-f]{6}$/i', $hex ) ) {
+			return null;
+		}
+		return array( hexdec( substr( $hex, 0, 2 ) ), hexdec( substr( $hex, 2, 2 ) ), hexdec( substr( $hex, 4, 2 ) ) );
+	}
+
+	/**
+	 * Culoare "inchisa" (luminanta relativa sub prag) => text alb deasupra.
+	 */
+	public static function is_dark( $hex ) {
+		$c = self::hex_parts( $hex );
+		if ( ! $c ) {
+			return true;
+		}
+		$l = ( 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2] ) / 255;
+		return $l < 0.6;
 	}
 
 	/**

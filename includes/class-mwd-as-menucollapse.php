@@ -131,12 +131,20 @@ class MWD_AS_MenuCollapse {
 	}
 
 	public function assets() {
+		$opts   = MWD_AS_Defaults::get_options();
 		$groups = array();
 		foreach ( $this->groups as $key => $label ) {
-			$groups[] = array( 'key' => $key, 'label' => $label );
+			$groups[] = array(
+				'key'   => $key,
+				'label' => $label,
+				'icon'  => sanitize_html_class( MWD_AS_Defaults::group_icon( $label ) ),
+			);
 		}
 
 		wp_enqueue_style( 'mwd-as-menu-collapse', MWD_AS_URL . 'assets/css/menu-collapse.css', array(), MWD_AS_VERSION );
+		if ( ! empty( $opts['hide_separators'] ) ) {
+			wp_add_inline_style( 'mwd-as-menu-collapse', '#adminmenu li.wp-menu-separator{display:none;}' );
+		}
 		wp_enqueue_script( 'mwd-as-menu-collapse', MWD_AS_URL . 'assets/js/menu-collapse.js', array(), MWD_AS_VERSION, true );
 		wp_localize_script(
 			'mwd-as-menu-collapse',
@@ -145,6 +153,8 @@ class MWD_AS_MenuCollapse {
 				'essentials' => array_values( self::essentials() ),
 				'label'      => 'Mai multe',
 				'groups'     => $groups,
+				'accordion'  => ! empty( $opts['menu_accordion'] ),
+				'storageKey' => 'mwdMenu:' . get_current_user_id(),
 			)
 		);
 	}

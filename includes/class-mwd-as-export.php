@@ -23,7 +23,7 @@ class MWD_AS_Export {
 	}
 
 	private function back( $msg ) {
-		wp_safe_redirect( add_query_arg( 'mwd_msg', $msg, admin_url( 'admin.php?page=mwd-admin-studio' ) ) );
+		wp_safe_redirect( MWD_AS_Settings::url( array( 'mwd_msg' => $msg, 'tab' => 'config' ) ) );
 		exit;
 	}
 
@@ -60,9 +60,17 @@ class MWD_AS_Export {
 			$this->back( 'import_error' );
 		}
 
-		// Pastreaza doar cheile cunoscute, completate cu valorile implicite.
-		$clean = wp_parse_args( array_intersect_key( $data, MWD_AS_Defaults::defaults() ), MWD_AS_Defaults::defaults() );
-		update_option( MWD_AS_OPTION, $clean );
+		// Doar cheile cunoscute, completate cu valorile implicite, apoi aceeasi sanitizare ca la salvare
+		// (un JSON modificat manual nu poate injecta HTML / valori invalide).
+		$data = wp_parse_args( array_intersect_key( $data, MWD_AS_Defaults::defaults() ), MWD_AS_Defaults::defaults() );
+		// Format vechi de meniu (fara roluri) -> 'default'.
+		if ( ! empty( $data['menu'] ) && is_array( $data['menu'] ) ) {
+			$first = reset( $data['menu'] );
+			if ( is_array( $first ) && ( isset( $first['order'] ) || isset( $first['hidden'] ) || isset( $first['title'] ) ) ) {
+				$data['menu'] = array( 'default' => $data['menu'] );
+			}
+		}
+		update_option( MWD_AS_OPTION, MWD_AS_Settings::sanitize_options( $data ) );
 
 		$this->back( 'imported' );
 	}
