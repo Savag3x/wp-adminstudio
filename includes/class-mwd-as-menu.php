@@ -29,6 +29,13 @@ class MWD_AS_Menu {
 
 		// Redenumire + ascundere (tarziu, dupa ce s-au inregistrat toate paginile).
 		add_action( 'admin_menu', array( $this, 'rename_and_hide' ), 9999 );
+
+		// Re-calculeaza pozitionarea nativa a meniului cand i se schimba inaltimea (vezi menu-pin.js).
+		add_action( 'admin_enqueue_scripts', array( $this, 'pin_script' ) );
+	}
+
+	public function pin_script() {
+		wp_enqueue_script( 'mwd-as-menu-pin', MWD_AS_URL . 'assets/js/menu-pin.js', array( 'jquery', 'common' ), MWD_AS_VERSION, true );
 	}
 
 	private function config() {

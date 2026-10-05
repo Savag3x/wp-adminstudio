@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.1.0
+- **Versiune:** 2.1.1
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,10 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.1.1
+
+- Meniul lateral nu mai rămâne „blocat" (fără scroll). WordPress măsoară înălțimea meniului o singură dată la încărcare și îl fixează pe ecran dacă încape; când meniul creștea ulterior (secțiuni deschise, fonturi încărcate târziu, pagini de update care se încarcă progresiv), rămânea fixat și partea de jos devenea inaccesibilă. Noul `assets/js/menu-pin.js` urmărește înălțimea meniului și a paginii și declanșează evenimentul nativ `wp-pin-menu`, la care WordPress își recalculează poziționarea. Se încarcă pe toate paginile de admin, independent de skin.
 
 ### 2.1.0
 
