@@ -57,6 +57,9 @@ body.mwd-as-ui ::selection {
    ========================================================= */
 @media screen and (min-width: 783px) {
 	body.mwd-as-canvas:not(.woocommerce-admin-page):not(.woocommerce-embed-page) #wpcontent {
+		/* flow-root: margin-top-ul panoului ramane IN cadru (altfel colapseaza prin #wpcontent
+		   si spatiul de 8px de sus arata fundalul paginii in loc de culoarea cadrului). */
+		display: flow-root;
 		padding-left: 0;
 		padding-right: 8px;
 		background: var(--mwd-sidebar-bg);

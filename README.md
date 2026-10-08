@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.3.0
+- **Versiune:** 2.3.1
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,10 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.3.1
+
+- Layout „canvas": banda de 8px dintre bara de sus și panoul de conținut apărea în culoarea fundalului paginii (cu strălucirea de accent peste ea, ex. verde-mentă) în loc de culoarea cadrului. Cauza: `margin-top`-ul panoului colapsa prin `#wpcontent`. Rezolvat cu `display: flow-root` pe `#wpcontent`.
 
 ### 2.3.0 — finisaj „Glossy"
 
