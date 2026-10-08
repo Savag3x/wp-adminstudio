@@ -132,7 +132,7 @@ class MWD_AS_Settings {
 		foreach ( self::BOOLEANS as $k ) {
 			$out[ $k ] = empty( $post[ $k ] ) ? 0 : 1;
 		}
-		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths', 'retention_days' ) ) as $k ) {
+		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'finish', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths', 'retention_days' ) ) as $k ) {
 			if ( isset( $post[ $k ] ) ) {
 				$out[ $k ] = $post[ $k ];
 			}
@@ -252,6 +252,7 @@ class MWD_AS_Settings {
 		$out['font']  = isset( $fonts[ $font ] ) ? $font : $d['font'];
 		$out['radius'] = isset( $in['radius'] ) ? max( 0, min( 28, (int) $in['radius'] ) ) : $d['radius'];
 		$out['retention_days'] = isset( $in['retention_days'] ) ? max( 30, min( 730, (int) $in['retention_days'] ) ) : $d['retention_days'];
+		$out['finish']       = isset( $in['finish'] ) && 'flat' === $in['finish'] ? 'flat' : 'glossy';
 		$out['density']      = isset( $in['density'] ) && 'compact' === $in['density'] ? 'compact' : 'comfortable';
 		$out['login_layout'] = isset( $in['login_layout'] ) && 'center' === $in['login_layout'] ? 'center' : 'split';
 
@@ -635,6 +636,13 @@ class MWD_AS_Settings {
 									$this->switch_row( 'style_adminbar', 'Stilizează bara de admin', 'Bara de sus preia culorile sidebar-ului.', $o['style_adminbar'] );
 									$this->switch_row( 'layout_canvas', 'Layout „canvas"', 'Conținutul stă pe un panou rotunjit, încadrat de sidebar și bara de sus — aspect de aplicație.', $o['layout_canvas'] );
 									?>
+									<div class="mwd-as-field">
+										<span class="mwd-as-label">Finisaj</span>
+										<div class="mwd-as-seg">
+											<label><input type="radio" name="finish" value="glossy" <?php checked( $o['finish'], 'glossy' ); ?> /><span>Glossy</span></label>
+											<label><input type="radio" name="finish" value="flat" <?php checked( $o['finish'], 'flat' ); ?> /><span>Mat</span></label>
+										</div>
+									</div>
 									<div class="mwd-as-field">
 										<span class="mwd-as-label">Densitate</span>
 										<div class="mwd-as-seg">

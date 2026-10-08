@@ -32,6 +32,9 @@ class MWD_AS_Login {
 		$opts      = MWD_AS_Defaults::get_options();
 		$classes[] = 'mwd-login';
 		$classes[] = 'split' === $opts['login_layout'] ? 'mwd-login-split' : 'mwd-login-center';
+		if ( ! isset( $opts['finish'] ) || 'flat' !== $opts['finish'] ) {
+			$classes[] = 'mwd-login-glossy';
+		}
 		return $classes;
 	}
 

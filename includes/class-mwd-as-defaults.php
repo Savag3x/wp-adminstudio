@@ -52,6 +52,7 @@ class MWD_AS_Defaults {
 			'font'           => 'Inter',
 			'radius'         => 12, // px
 			'density'        => 'comfortable', // comfortable | compact
+			'finish'         => 'glossy', // glossy (sticla, luciu, gradiente) | flat (mat)
 			'layout_canvas'  => 1, // continut pe panou rotunjit, incadrat de sidebar + bara de sus
 
 			// Branding login

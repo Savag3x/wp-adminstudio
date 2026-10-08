@@ -34,6 +34,11 @@ class MWD_AS_Styler {
 				$classes .= ' mwd-as-canvas';
 			}
 		}
+		// Finisaj glossy + tonul sidebar-ului (pentru reflexe potrivite pe fundal inchis / deschis).
+		if ( ! isset( $opts['finish'] ) || 'flat' !== $opts['finish'] ) {
+			$classes .= ' mwd-as-glossy';
+		}
+		$classes .= self::is_dark( $this->color( $opts['sidebar_bg'] ) ) ? ' mwd-sb-dark' : ' mwd-sb-light';
 		if ( isset( $opts['density'] ) && 'compact' === $opts['density'] ) {
 			$classes .= ' mwd-as-compact';
 		}
@@ -77,6 +82,11 @@ class MWD_AS_Styler {
 
 		// 3) Paleta dinamica din setari, injectata ca variabile CSS.
 		wp_add_inline_style( 'mwd-as-admin', $this->dynamic_css( $opts ) );
+
+		// 3b) Finisajul glossy: strat separat, incarcat dupa skin (si dupa dashboard / setari).
+		if ( ! isset( $opts['finish'] ) || 'flat' !== $opts['finish'] ) {
+			wp_enqueue_style( 'mwd-as-glossy', MWD_AS_URL . 'assets/css/glossy.css', array( 'mwd-as-admin' ), MWD_AS_VERSION );
+		}
 
 		// 4) „Shell": antetul workspace + cardul utilizatorului din sidebar.
 		$user  = wp_get_current_user();

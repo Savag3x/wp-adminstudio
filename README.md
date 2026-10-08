@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.2.0
+- **Versiune:** 2.3.0
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,18 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.3.0 — finisaj „Glossy"
+
+- Opțiune nouă **Aspect → Skin → Finisaj: Glossy / Mat** (Glossy implicit). Stratul glossy e un fișier separat (`assets/css/glossy.css`), încărcat doar când e activ; „Mat" revine exact la designul 2.2.
+- **Cadru luminos**: sidebar și bara de sus cu lumină de accent și reflex; canvas cu aurora discretă sus și margine luminoasă.
+- **Element activ**: pastilă lucioasă în gradient de accent, cu luciu și strălucire; flyout-uri și meniuri din bara de sus din sticlă (blur).
+- **Sticlă**: carduri, tabele, metabox-uri și pagina de setări cu fundal translucid, margini în gradient și reflex sus (blur real doar pe cardurile mici, ca scroll-ul să rămână fluid).
+- **Butoane**: primare în gradient cu luciu și strălucire; secundare cu luciu translucid peste culoarea proprie (nu acoperă culorile altor plugin-uri sau mostrele de culoare).
+- **Dashboard**: salut în gradient, KPI-uri cu iconițe lucioase și reflex de accent, grafice cu umpluturi în gradient, tooltip din sticlă.
+- **Login**: card de sticlă peste aurora, buton lucios, panou de brand cu reflex diagonal.
+- **⌘K**: fereastră de sticlă.
+- Accesibilitate: fără transparențe când sistemul cere „reduce transparency"; inel de focus vizibil peste stilurile lucioase.
 
 ### 2.2.0 — design „Premium"
 

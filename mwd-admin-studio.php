@@ -3,7 +3,7 @@
  * Plugin Name:       MWD Admin Studio
  * Plugin URI:        https://mywebdesign.ro/
  * Description:       Reskin SaaS complet al panoului de administrare WordPress: design modern, paleta de comenzi (⌘K), meniu organizat pe sectiuni, manager de meniu/coloane pe roluri, login restilizat, dashboard si analitice.
- * Version:           2.2.0
+ * Version:           2.3.0
  * Author:            Alexandru Raileanu / MyWebDesign.ro
  * Author URI:        https://mywebdesign.ro/
  * Text Domain:       mwd-admin-studio
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MWD_AS_VERSION', '2.2.0' );
+define( 'MWD_AS_VERSION', '2.3.0' );
 define( 'MWD_AS_FILE', __FILE__ );
 define( 'MWD_AS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MWD_AS_URL', plugin_dir_url( __FILE__ ) );

@@ -1,0 +1,389 @@
+/*
+ * MWD Admin Studio — finisaj „Glossy".
+ * Strat peste admin.css: sticla (blur + transparenta), luciu, gradiente si reflexe.
+ *
+ * Aceeasi regula critica: pe #adminmenuwrap / #adminmenuback doar fundaluri (background),
+ * NICIODATA overflow / position / z-index.
+ *
+ *  body.mwd-as-glossy  -> finisajul e activ
+ *  body.mwd-sb-dark    -> sidebar inchis (reflexe albe)
+ *  body.mwd-sb-light   -> sidebar deschis (reflexe discrete, umbre)
+ */
+
+body.mwd-as-glossy {
+	--g-sheen: linear-gradient(180deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 55%);
+	--g-glass: linear-gradient(180deg, rgba(255, 255, 255, .94), rgba(255, 255, 255, .78));
+	--g-edge: linear-gradient(140deg, rgba(255, 255, 255, .95), rgba(var(--mwd-accent-rgb), .22) 45%, rgba(15, 23, 42, .08));
+	--g-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 1px 2px rgba(16, 24, 40, .06), 0 14px 32px -16px rgba(16, 24, 40, .22);
+	--g-blur: blur(16px) saturate(170%);
+}
+
+/* =========================================================
+   1. Cadru: sidebar + bara de sus cu lumina de accent
+   ========================================================= */
+body.mwd-as-glossy #adminmenuback {
+	background:
+		radial-gradient(150% 50% at 0% 0%, rgba(var(--mwd-accent-rgb), .38), transparent 62%),
+		radial-gradient(140% 45% at 100% 100%, rgba(var(--mwd-accent-rgb), .22), transparent 60%),
+		linear-gradient(180deg, rgba(255, 255, 255, .035), rgba(255, 255, 255, 0) 35%),
+		var(--mwd-sidebar-bg);
+}
+body.mwd-as-glossy.mwd-sb-light #adminmenuback {
+	background:
+		radial-gradient(130% 45% at 0% 0%, rgba(var(--mwd-accent-rgb), .10), transparent 62%),
+		linear-gradient(180deg, #ffffff, var(--mwd-sidebar-bg) 40%);
+}
+/* Meniul devine transparent ca sa se vada fundalul luminos de dedesubt. */
+body.mwd-as-glossy #adminmenuwrap,
+body.mwd-as-glossy #adminmenu {
+	background: transparent;
+}
+body.mwd-as-glossy #wpadminbar {
+	background:
+		linear-gradient(90deg, rgba(var(--mwd-accent-rgb), .26), rgba(var(--mwd-accent-rgb), 0) 38%),
+		linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0)),
+		var(--mwd-sidebar-bg);
+}
+body.mwd-as-glossy.mwd-sb-light #wpadminbar {
+	background:
+		linear-gradient(90deg, rgba(var(--mwd-accent-rgb), .08), rgba(var(--mwd-accent-rgb), 0) 38%),
+		var(--mwd-sidebar-bg);
+}
+
+/* Element activ: pastila lucioasa in gradient de accent */
+body.mwd-as-glossy #adminmenu li.current a.menu-top,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu.opensub > a.menu-top,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu:hover > a.menu-top {
+	background:
+		var(--g-sheen),
+		linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	color: var(--mwd-on-accent);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, .32),
+		inset 0 0 0 1px rgba(255, 255, 255, .12),
+		0 8px 22px -8px rgba(var(--mwd-accent-rgb), .85);
+}
+body.mwd-as-glossy #adminmenu li.current div.wp-menu-image:before,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu div.wp-menu-image:before {
+	color: var(--mwd-on-accent);
+}
+body.mwd-as-glossy #adminmenu li.current a.menu-top .awaiting-mod,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu a .update-plugins,
+body.mwd-as-glossy #adminmenu li.wp-has-current-submenu a .awaiting-mod {
+	background: rgba(255, 255, 255, .25);
+	color: var(--mwd-on-accent);
+}
+body.mwd-as-glossy #adminmenu li.menu-top:not(.current):not(.wp-has-current-submenu):hover > a.menu-top {
+	background: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+body.mwd-as-glossy.mwd-sb-light #adminmenu li.menu-top:not(.current):not(.wp-has-current-submenu):hover > a.menu-top {
+	background: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .6));
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .08), inset 0 0 0 1px rgba(15, 23, 42, .06);
+}
+/* Flyout-uri de sticla */
+body.mwd-as-glossy #adminmenu .wp-not-current-submenu .wp-submenu,
+body.mwd-as-glossy.folded #adminmenu .wp-has-current-submenu .wp-submenu,
+body.mwd-as-glossy #wpadminbar .menupop .ab-sub-wrapper {
+	background: color-mix(in srgb, var(--mwd-sidebar-raised) 82%, transparent);
+	-webkit-backdrop-filter: blur(18px) saturate(160%);
+	backdrop-filter: blur(18px) saturate(160%);
+}
+/* Workspace + utilizator: monograma lucioasa */
+body.mwd-as-glossy .mwd-shell-mark {
+	background:
+		var(--g-sheen),
+		linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 4px 12px -4px rgba(var(--mwd-accent-rgb), .8);
+}
+
+/* =========================================================
+   2. Canvas: aurora discreta + reflex pe margine
+   ========================================================= */
+@media screen and (min-width: 783px) {
+	body.mwd-as-glossy.mwd-as-canvas:not(.woocommerce-admin-page):not(.woocommerce-embed-page) #wpcontent {
+		background:
+			radial-gradient(60% 50% at 100% 0%, rgba(var(--mwd-accent-rgb), .22), transparent 70%),
+			var(--mwd-sidebar-bg);
+	}
+	body.mwd-as-glossy.mwd-sb-light.mwd-as-canvas:not(.woocommerce-admin-page):not(.woocommerce-embed-page) #wpcontent {
+		background: var(--mwd-sidebar-bg);
+	}
+	body.mwd-as-glossy.mwd-as-canvas:not(.woocommerce-admin-page):not(.woocommerce-embed-page) #wpbody {
+		background-color: var(--mwd-content-bg);
+		background-image:
+			radial-gradient(820px 360px at 88% -40px, rgba(var(--mwd-accent-rgb), .22), transparent 72%),
+			radial-gradient(640px 300px at 4% -60px, rgba(var(--mwd-accent-rgb), .13), transparent 72%);
+		background-repeat: no-repeat;
+		border-color: rgba(255, 255, 255, .14);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 -8px 40px -20px rgba(var(--mwd-accent-rgb), .5);
+	}
+	body.mwd-as-glossy.mwd-sb-light.mwd-as-canvas:not(.woocommerce-admin-page):not(.woocommerce-embed-page) #wpbody {
+		border-color: rgba(15, 23, 42, .07);
+		box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(16, 24, 40, .06);
+	}
+}
+body.mwd-as-glossy.mwd-as-ui #wpbody,
+body.mwd-as-glossy.mwd-as-ui #wpbody-content {
+	background-color: var(--mwd-content-bg);
+}
+body.mwd-as-glossy.mwd-as-ui #wpbody {
+	background-image:
+		radial-gradient(820px 360px at 88% -40px, rgba(var(--mwd-accent-rgb), .22), transparent 72%),
+		radial-gradient(640px 300px at 4% -60px, rgba(var(--mwd-accent-rgb), .13), transparent 72%);
+	background-repeat: no-repeat;
+}
+body.mwd-as-glossy.mwd-as-ui #wpbody-content {
+	background: transparent;
+}
+
+/* =========================================================
+   3. Suprafete de sticla: carduri, tabele, metabox-uri
+   ========================================================= */
+body.mwd-as-glossy.mwd-as-ui .postbox,
+body.mwd-as-glossy.mwd-as-ui .card,
+body.mwd-as-glossy.mwd-as-ui .stuffbox,
+body.mwd-as-glossy.mwd-as-ui .wp-list-table,
+body.mwd-as-glossy.mwd-as-ui table.widefat,
+body.mwd-as-glossy .mwd-dash-card,
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-card,
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-nav,
+body.mwd-as-glossy .mwd-an-kpi {
+	border: 1px solid transparent;
+	background: var(--g-glass) padding-box, var(--g-edge) border-box;
+	box-shadow: var(--g-shadow);
+}
+/* Blur real doar pe cardurile mici (pe tabele mari ar costa la scroll). */
+body.mwd-as-glossy .mwd-dash-card,
+body.mwd-as-glossy .mwd-dash-stat,
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-card,
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-nav,
+body.mwd-as-glossy.mwd-as-ui .postbox {
+	-webkit-backdrop-filter: var(--g-blur);
+	backdrop-filter: var(--g-blur);
+}
+body.mwd-as-glossy.mwd-as-ui .wp-list-table thead th,
+body.mwd-as-glossy.mwd-as-ui .wp-list-table thead td,
+body.mwd-as-glossy.mwd-as-ui table.widefat thead th,
+body.mwd-as-glossy.mwd-as-ui table.widefat thead td,
+body.mwd-as-glossy.mwd-as-ui .wp-list-table tfoot th,
+body.mwd-as-glossy.mwd-as-ui .wp-list-table tfoot td {
+	background: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(244, 244, 247, .7));
+}
+body.mwd-as-glossy.mwd-as-ui .wp-list-table tbody tr:hover > * {
+	background-color: rgba(var(--mwd-accent-rgb), .035);
+}
+
+/* =========================================================
+   4. Butoane lucioase
+   ========================================================= */
+body.mwd-as-glossy :is(.wp-core-ui, .wp-core-ui *) .button-primary,
+body.mwd-as-glossy.wp-core-ui .button-primary {
+	border-color: rgba(0, 0, 0, .06);
+	background:
+		var(--g-sheen),
+		linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, .35),
+		inset 0 0 0 1px rgba(255, 255, 255, .1),
+		0 1px 2px rgba(16, 24, 40, .14),
+		0 6px 16px -6px rgba(var(--mwd-accent-rgb), .7);
+	transition: filter .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+body.mwd-as-glossy :is(.wp-core-ui, .wp-core-ui *) .button-primary:hover,
+body.mwd-as-glossy.wp-core-ui .button-primary:hover,
+body.mwd-as-glossy.wp-core-ui .button-primary:focus {
+	border-color: rgba(0, 0, 0, .06);
+	background:
+		var(--g-sheen),
+		linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	filter: brightness(1.06);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, .4),
+		inset 0 0 0 1px rgba(255, 255, 255, .12),
+		0 1px 2px rgba(16, 24, 40, .14),
+		0 10px 22px -8px rgba(var(--mwd-accent-rgb), .8);
+}
+body.mwd-as-glossy.wp-core-ui .button-primary:active {
+	filter: brightness(.96);
+	transform: translateY(.5px);
+}
+/* Luciu translucid PESTE culoarea butonului (pastreaza culorile proprii ale altor plugin-uri
+   si mostrele din selectoarele de culoare). */
+body.mwd-as-glossy.mwd-as-ui.wp-core-ui .button:not(.button-primary):not(.wp-color-result),
+body.mwd-as-glossy.mwd-as-ui .wp-core-ui .button:not(.button-primary):not(.wp-color-result),
+body.mwd-as-glossy.mwd-as-ui .wrap .page-title-action {
+	background-image: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, .03));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 1px 2px rgba(16, 24, 40, .08);
+}
+
+/* =========================================================
+   5. Formulare & notificari
+   ========================================================= */
+body.mwd-as-glossy.mwd-as-ui input[type="text"],
+body.mwd-as-glossy.mwd-as-ui input[type="search"],
+body.mwd-as-glossy.mwd-as-ui input[type="email"],
+body.mwd-as-glossy.mwd-as-ui input[type="url"],
+body.mwd-as-glossy.mwd-as-ui input[type="password"],
+body.mwd-as-glossy.mwd-as-ui input[type="number"],
+body.mwd-as-glossy.mwd-as-ui select,
+body.mwd-as-glossy.mwd-as-ui textarea {
+	box-shadow: inset 0 1px 2px rgba(16, 24, 40, .05), 0 1px 0 rgba(255, 255, 255, .8);
+}
+body.mwd-as-glossy.mwd-as-ui input:focus,
+body.mwd-as-glossy.mwd-as-ui select:focus,
+body.mwd-as-glossy.mwd-as-ui textarea:focus {
+	box-shadow: var(--mwd-ring), inset 0 1px 2px rgba(16, 24, 40, .04);
+}
+body.mwd-as-glossy.mwd-as-ui input[type="checkbox"]:checked {
+	background: var(--g-sheen), linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+}
+body.mwd-as-glossy.mwd-as-ui .notice,
+body.mwd-as-glossy.mwd-as-ui div.updated,
+body.mwd-as-glossy.mwd-as-ui div.error {
+	background-image: linear-gradient(180deg, rgba(255, 255, 255, .7), rgba(255, 255, 255, 0));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 1px 2px rgba(16, 24, 40, .06);
+}
+body.mwd-as-glossy.mwd-as-ui .subsubsub a.current {
+	background: linear-gradient(180deg, #ffffff, #f6f6f8);
+	box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(16, 24, 40, .08), inset 0 0 0 1px rgba(15, 23, 42, .07);
+}
+
+/* =========================================================
+   6. Dashboard
+   ========================================================= */
+/* Salutul in gradient */
+body.mwd-as-glossy .mwd-dash-title,
+body.mwd-as-glossy.mwd-as-ui .wrap h1.mwd-dash-title {
+	display: inline-block;
+	-webkit-text-fill-color: transparent;
+	background: linear-gradient(100deg, #0f172a 20%, var(--mwd-accent) 130%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+/* KPI: sticla + margine in gradient + reflex */
+body.mwd-as-glossy .mwd-dash-stat {
+	border: 1px solid transparent;
+	background:
+		radial-gradient(120% 80% at 100% 0%, rgba(var(--mwd-accent-rgb), .10), transparent 55%) padding-box,
+		var(--g-glass) padding-box,
+		var(--g-edge) border-box;
+	box-shadow: var(--g-shadow);
+}
+body.mwd-as-glossy .mwd-dash-stat:hover {
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 1px 2px rgba(16, 24, 40, .06), 0 20px 40px -18px rgba(var(--mwd-accent-rgb), .45);
+}
+body.mwd-as-glossy .mwd-dash-stat-ico,
+body.mwd-as-glossy .mwd-dash-woo-alert .mwd-dash-woo-big {
+	background: var(--g-sheen), linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	color: var(--mwd-on-accent);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 6px 14px -6px rgba(var(--mwd-accent-rgb), .8);
+}
+body.mwd-as-glossy .mwd-dash-woo-alert .mwd-dash-woo-big {
+	padding: 4px 10px;
+	border-radius: 8px;
+}
+body.mwd-as-glossy .mwd-dash-period,
+body.mwd-as-glossy .mwd-dash-online,
+body.mwd-as-glossy .mwd-dash-btn,
+body.mwd-as-glossy .mwd-dash-trend-tabs {
+	background: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(244, 244, 247, .85));
+	box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(16, 24, 40, .08);
+	-webkit-backdrop-filter: var(--g-blur);
+	backdrop-filter: var(--g-blur);
+}
+body.mwd-as-glossy .mwd-dash .mwd-dash-period-btn.is-active,
+body.mwd-as-glossy .mwd-dash .mwd-dash-period-btn.is-active:hover {
+	background: var(--g-sheen), linear-gradient(135deg, #27272a, #09090b);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 2px 6px -2px rgba(0, 0, 0, .5);
+}
+body.mwd-as-glossy .mwd-dash-trend-tab.is-active {
+	background: linear-gradient(180deg, #ffffff, #f7f7f9);
+	box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(16, 24, 40, .14);
+}
+body.mwd-as-glossy .mwd-dash-action {
+	background: linear-gradient(180deg, #ffffff, #f7f7f9);
+	box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(16, 24, 40, .06);
+}
+body.mwd-as-glossy .mwd-dash-dev-bar span {
+	background: var(--g-sheen), linear-gradient(90deg, var(--mwd-accent-hover), var(--mwd-accent));
+}
+/* Grafice: umpluturi in gradient (definite in SVG de dashboard-chart.js / sparkline) */
+body.mwd-as-glossy .mwd-chart-area { fill: url(#mwd-g-area); opacity: 1; }
+body.mwd-as-glossy .mwd-chart-bar { fill: url(#mwd-g-bar); }
+body.mwd-as-glossy .mwd-chart-line { filter: drop-shadow(0 4px 6px rgba(var(--mwd-accent-rgb), .35)); }
+body.mwd-as-glossy .mwd-dash-spark .a { fill: url(#mwd-g-spark); opacity: 1; }
+body.mwd-as-glossy .mwd-chart-tip {
+	background: rgba(15, 23, 42, .82);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 10px 24px -8px rgba(15, 23, 42, .45);
+}
+
+/* =========================================================
+   7. Pagina de setari Admin Studio
+   ========================================================= */
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-logo,
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-btn-primary,
+body.mwd-as-glossy .mwd-as-wrap .mwd-switch input:checked + .mwd-switch-ui {
+	background: var(--g-sheen), linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 6px 16px -6px rgba(var(--mwd-accent-rgb), .7);
+}
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-btn:not(.mwd-as-btn-primary) {
+	background-image: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 60%), linear-gradient(180deg, rgba(15, 23, 42, 0), rgba(15, 23, 42, .03));
+	box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(16, 24, 40, .08);
+}
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-navbtn.is-active {
+	background: linear-gradient(180deg, rgba(var(--mwd-accent-rgb), .16), rgba(var(--mwd-accent-rgb), .07));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), inset 0 0 0 1px rgba(var(--mwd-accent-rgb), .18);
+}
+body.mwd-as-glossy .mwd-as-wrap .mwd-as-savebar {
+	background: rgba(15, 23, 42, .82);
+	-webkit-backdrop-filter: blur(16px) saturate(160%);
+	backdrop-filter: blur(16px) saturate(160%);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), 0 20px 40px -12px rgba(15, 23, 42, .5);
+}
+
+/* =========================================================
+   8. Paleta de comenzi (⌘K): fereastra de sticla
+   ========================================================= */
+body.mwd-as-glossy .mwd-cmdk-panel {
+	border: 1px solid rgba(255, 255, 255, .6);
+	background: rgba(255, 255, 255, .78);
+	-webkit-backdrop-filter: blur(24px) saturate(180%);
+	backdrop-filter: blur(24px) saturate(180%);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 30px 80px -20px rgba(15, 23, 42, .45);
+}
+body.mwd-as-glossy .mwd-cmdk-foot {
+	background: rgba(248, 250, 252, .6);
+}
+body.mwd-as-glossy .mwd-cmdk-item.is-active .mwd-cmdk-item-ico {
+	background: var(--g-sheen), linear-gradient(135deg, var(--mwd-accent), var(--mwd-accent-hover));
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+/* =========================================================
+   Accesibilitate: fara transparenta / animatii cand utilizatorul cere
+   ========================================================= */
+@media (prefers-reduced-transparency: reduce) {
+	body.mwd-as-glossy * {
+		-webkit-backdrop-filter: none !important;
+		backdrop-filter: none !important;
+	}
+}
+@media (forced-colors: active) {
+	body.mwd-as-glossy .mwd-dash-title {
+		color: CanvasText;
+		background: none;
+	}
+}
+
+/* Focus vizibil peste stilurile lucioase */
+body.mwd-as-glossy.wp-core-ui .button-primary:focus-visible,
+body.mwd-as-glossy.mwd-as-ui.wp-core-ui .button:not(.button-primary):not(.wp-color-result):focus-visible,
+body.mwd-as-glossy.mwd-as-ui .wrap .page-title-action:focus-visible {
+	box-shadow: var(--mwd-ring), inset 0 1px 0 rgba(255, 255, 255, .35);
+	outline: 0;
+}

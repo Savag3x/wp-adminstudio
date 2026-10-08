@@ -115,6 +115,23 @@ class MWD_AS_Dashboard {
 		?>
 		<div class="mwd-dash">
 
+			<svg class="mwd-dash-defs" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+				<defs>
+					<linearGradient id="mwd-g-area" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" style="stop-color:var(--mwd-accent);stop-opacity:.32"/>
+						<stop offset="1" style="stop-color:var(--mwd-accent);stop-opacity:0"/>
+					</linearGradient>
+					<linearGradient id="mwd-g-spark" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" style="stop-color:var(--mwd-accent);stop-opacity:.22"/>
+						<stop offset="1" style="stop-color:var(--mwd-accent);stop-opacity:0"/>
+					</linearGradient>
+					<linearGradient id="mwd-g-bar" x1="0" y1="0" x2="0" y2="1">
+						<stop offset="0" style="stop-color:var(--mwd-accent);stop-opacity:1"/>
+						<stop offset="1" style="stop-color:var(--mwd-accent-hover);stop-opacity:.55"/>
+					</linearGradient>
+				</defs>
+			</svg>
+
 			<div class="mwd-dash-head">
 				<div>
 					<h1 class="mwd-dash-title"><?php echo esc_html( $title ); ?></h1>
