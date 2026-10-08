@@ -213,3 +213,69 @@ body.login.mwd-login-center #login {
 	width: 360px;
 	padding-top: 10vh;
 }
+
+/* =====================================================================
+   Stil premium
+   ===================================================================== */
+.mwd-login-head {
+	margin: 0 0 18px;
+	text-align: center;
+}
+.mwd-login-head h2 {
+	margin: 0 0 6px;
+	color: #fff;
+	font-size: 24px;
+	font-weight: 650;
+	letter-spacing: -0.03em;
+}
+.mwd-login-head p {
+	margin: 0;
+	color: rgba(255, 255, 255, .65);
+	font-size: 14px;
+}
+.login form {
+	border-color: rgba(15, 23, 42, .07);
+	border-radius: 16px;
+}
+.login label { font-weight: 500; color: #3f3f46; }
+.login form .input,
+.login input[type="text"],
+.login input[type="password"],
+.login input[type="email"] {
+	border-radius: 9px;
+	border-color: rgba(15, 23, 42, .13);
+	font-size: 14.5px;
+}
+.login .button-primary,
+.wp-core-ui .login .button-primary {
+	border-radius: 9px !important;
+	background-image: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0)) !important;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .16), inset 0 1px 0 rgba(255, 255, 255, .22), inset 0 0 0 1px rgba(0, 0, 0, .08) !important;
+}
+.login .button-primary:hover { transform: none; }
+
+@media (min-width: 961px) {
+	/* Panoul de brand: lumina de accent + grila de puncte discreta */
+	body.login.mwd-login-split::before {
+		background:
+			radial-gradient(rgba(255, 255, 255, .09) 1px, transparent 1.2px) 0 0 / 22px 22px,
+			radial-gradient(700px 420px at 15% 10%, rgba(var(--mwd-accent-rgb), .45), transparent 65%),
+			radial-gradient(600px 400px at 95% 100%, rgba(var(--mwd-accent-rgb), .25), transparent 60%),
+			var(--mwd-login-bg);
+		font-size: 38px;
+		font-weight: 650;
+		letter-spacing: -0.035em;
+		border-right: 1px solid rgba(255, 255, 255, .06);
+	}
+	body.login.mwd-login-split .mwd-login-head h2 { color: #09090b; }
+	body.login.mwd-login-split .mwd-login-head p { color: #71717a; }
+	body.login.mwd-login-split {
+		background: radial-gradient(900px 500px at 70% -10%, rgba(var(--mwd-accent-rgb), .07), transparent 60%), #fafafa;
+	}
+	body.login.mwd-login-split form {
+		box-shadow: 0 1px 2px rgba(16, 24, 40, .05), 0 24px 48px -24px rgba(16, 24, 40, .22);
+	}
+}
+@media (max-width: 960px) {
+	body.login.mwd-login-split .mwd-login-head h2 { color: #fff; }
+}

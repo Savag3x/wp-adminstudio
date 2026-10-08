@@ -26,8 +26,13 @@ class MWD_AS_Styler {
 		// Stilurile de continut (inputuri, linkuri, tabele) nu se aplica in editorul de blocuri,
 		// care are propriul design system.
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! ( $screen && method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor() ) ) {
+		$block_editor = $screen && method_exists( $screen, 'is_block_editor' ) && $screen->is_block_editor();
+		if ( ! $block_editor ) {
 			$classes .= ' mwd-as-ui';
+			// Layout „canvas": continutul pe un panou rotunjit, incadrat de sidebar + bara de sus.
+			if ( ! empty( $opts['layout_canvas'] ) ) {
+				$classes .= ' mwd-as-canvas';
+			}
 		}
 		if ( isset( $opts['density'] ) && 'compact' === $opts['density'] ) {
 			$classes .= ' mwd-as-compact';
@@ -72,6 +77,32 @@ class MWD_AS_Styler {
 
 		// 3) Paleta dinamica din setari, injectata ca variabile CSS.
 		wp_add_inline_style( 'mwd-as-admin', $this->dynamic_css( $opts ) );
+
+		// 4) „Shell": antetul workspace + cardul utilizatorului din sidebar.
+		$user  = wp_get_current_user();
+		$roles = MWD_AS_Defaults::roles();
+		$role  = MWD_AS_Defaults::user_role( $user );
+		$name  = get_bloginfo( 'name' );
+		wp_enqueue_script( 'mwd-as-shell', MWD_AS_URL . 'assets/js/shell.js', array(), MWD_AS_VERSION, true );
+		wp_localize_script(
+			'mwd-as-shell',
+			'MWDShell',
+			array(
+				'site'     => array(
+					'name' => '' !== trim( $name ) ? $name : wp_parse_url( home_url(), PHP_URL_HOST ),
+					'url'  => home_url( '/' ),
+					'icon' => (string) get_site_icon_url( 64 ),
+					'host' => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
+				),
+				'user'     => array(
+					'name'   => $user->display_name,
+					'role'   => isset( $roles[ $role ] ) ? $roles[ $role ] : '',
+					'avatar' => (string) get_avatar_url( $user->ID, array( 'size' => 64 ) ),
+					'url'    => admin_url( 'profile.php' ),
+				),
+				'viewSite' => 'Vezi site-ul',
+			)
+		);
 	}
 
 	/**
@@ -93,7 +124,9 @@ class MWD_AS_Styler {
 			'--mwd-sidebar-bg'    => $sidebar,
 			'--mwd-sidebar-bg-2'  => $this->shade( $sidebar, -0.18 ),
 			'--mwd-sidebar-line'  => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.07)' : 'rgba(15,23,42,.08)',
-			'--mwd-sidebar-hover' => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.07)' : 'rgba(15,23,42,.05)',
+			'--mwd-sidebar-hover' => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.055)' : 'rgba(15,23,42,.045)',
+			'--mwd-sidebar-active' => self::is_dark( $sidebar ) ? 'rgba(255,255,255,.09)' : 'rgba(15,23,42,.075)',
+			'--mwd-sidebar-raised' => self::is_dark( $sidebar ) ? $this->shade( $sidebar, 0.07 ) : '#ffffff',
 			'--mwd-sidebar-strong' => self::is_dark( $sidebar ) ? '#ffffff' : '#0f172a',
 			'--mwd-accent-rgb'    => $this->rgb( $accent ),
 			'--mwd-on-accent'     => self::is_dark( $accent ) ? '#ffffff' : '#0f172a',

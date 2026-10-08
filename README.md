@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.1.1
+- **Versiune:** 2.2.0
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,17 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.2.0 — design „Premium"
+
+- **Layout „canvas"**: sidebar-ul și bara de sus formează un cadru unitar, iar conținutul stă pe un panou rotunjit. Opțiune în *Aspect → Skin* (activă implicit); dezactivat automat pe mobil și pe paginile WooCommerce Admin cu antet propriu.
+- **Sidebar de aplicație**: antet „workspace" (iconița site-ului sau inițiale, nume, domeniu → deschide site-ul) și cardul utilizatorului (avatar, nume, rol → profil). Spațiul e rezervat din CSS, fără salt de layout la încărcare.
+- **Element activ discret**: fundal subtil + iconiță în culoarea de accent, în locul pastilei saturate; sub-meniul paginii curente e un arbore cu linie de ghidaj; flyout-urile sunt carduri cu umbră.
+- **Componente rafinate**: butoane primare cu luciu și contur interior, butoane secundare neutre, inputuri cu hover/focus, tabele fără dungi cu antete uppercase, filtre tip „segmented control", notificări cu fundal nuanțat și iconiță, umbre și borduri mai fine.
+- **Dashboard**: mini-grafice de tendință în cardurile KPI, iconițe și butoane neutre (accentul rămâne pentru date), variații compacte.
+- **Login**: titlu „Bine ai revenit", panou de brand cu grilă de puncte și lumină de accent.
+- **Preseturi noi**: *Onyx* (negru + violet) și *Mono* (sidebar deschis, monocrom). Instalările noi pornesc cu Onyx + fontul Inter; instalările existente își păstrează paleta salvată.
+- Corectură: butoanele secundare WordPress (Apply, Filter, Search…) nu preluau stilul skin-ului, pentru că WP pune clasa `wp-core-ui` direct pe `body`.
 
 ### 2.1.1
 

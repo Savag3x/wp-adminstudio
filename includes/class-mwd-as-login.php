@@ -13,6 +13,19 @@ class MWD_AS_Login {
 		add_filter( 'login_headerurl', array( $this, 'logo_url' ) );
 		add_filter( 'login_headertext', array( $this, 'logo_text' ) );
 		add_filter( 'login_body_class', array( $this, 'body_class' ) );
+		add_filter( 'login_message', array( $this, 'heading' ) );
+	}
+
+	/**
+	 * Titlu deasupra formularului (doar pe ecranul de autentificare, fara alt mesaj).
+	 */
+	public function heading( $message ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : 'login';
+		if ( 'login' !== $action || '' !== trim( (string) $message ) ) {
+			return $message;
+		}
+		return '<div class="mwd-login-head"><h2>Bine ai revenit</h2><p>' . esc_html( sprintf( 'Autentifică-te în %s', get_bloginfo( 'name' ) ) ) . '</p></div>';
 	}
 
 	public function body_class( $classes ) {

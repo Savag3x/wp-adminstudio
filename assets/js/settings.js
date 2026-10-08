@@ -67,6 +67,8 @@
 		} );
 
 		var presets = {
+			onyx:     { sidebar_bg: '#0b0b0f', sidebar_text: '#a1a1aa', accent: '#6d5efc', accent_hover: '#5b4bf0', content_bg: '#f7f7f8', link: '#4f46e5' },
+			mono:     { sidebar_bg: '#f4f4f5', sidebar_text: '#52525b', accent: '#18181b', accent_hover: '#000000', content_bg: '#ffffff', link: '#18181b' },
 			mwd:      { sidebar_bg: '#0f2744', sidebar_text: '#c7d2e0', accent: '#10b981', accent_hover: '#0ea371', content_bg: '#f4f6fb', link: '#0f2744' },
 			midnight: { sidebar_bg: '#0b0f19', sidebar_text: '#a5b0c5', accent: '#6366f1', accent_hover: '#4f46e5', content_bg: '#f5f6fa', link: '#4338ca' },
 			graphite: { sidebar_bg: '#18181b', sidebar_text: '#a1a1aa', accent: '#f97316', accent_hover: '#ea580c', content_bg: '#f7f7f8', link: '#18181b' },

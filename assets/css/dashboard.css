@@ -404,3 +404,102 @@ a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.0
 
 /* Valorile KPI rămân în culoarea textului (culoarea de accent e rezervată graficelor). */
 .mwd-dash-stat-num.is-accent { color: var(--nv); }
+
+/* =====================================================================
+   Stil premium (suprascrie stilurile de baza de mai sus)
+   ===================================================================== */
+.mwd-dash { margin-top: 22px; }
+.mwd-dash-title { font-size: 26px; font-weight: 650; letter-spacing: -0.03em; }
+.mwd-dash-sub { color: #71717a; }
+
+/* Butoane antet: neutre, accentul ramane pentru date */
+.mwd-dash-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border: 1px solid rgba(15, 23, 42, .12);
+	border-radius: 8px;
+	background: #fff;
+	color: #0f172a !important;
+	font-weight: 500;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+	transition: background-color .15s ease, border-color .15s ease;
+}
+.mwd-dash-btn:hover { opacity: 1; background: #fafafa; border-color: rgba(15, 23, 42, .2); color: #0f172a !important; }
+.mwd-dash-period {
+	border-radius: 10px;
+	border-color: rgba(15, 23, 42, .08);
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+}
+.mwd-dash-period-btn { border-radius: 7px; padding: 6px 12px; color: #71717a; }
+.mwd-dash .mwd-dash-period-btn.is-active,
+.mwd-dash .mwd-dash-period-btn.is-active:hover { background: #18181b; color: #fff; }
+.mwd-dash-online { border-radius: 8px; border-color: rgba(15, 23, 42, .08); box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+
+/* Carduri */
+.mwd-dash-card,
+.mwd-dash-stat {
+	border-color: rgba(15, 23, 42, .075);
+	box-shadow: 0 1px 3px rgba(16, 24, 40, .06), 0 1px 2px -1px rgba(16, 24, 40, .05);
+}
+.mwd-dash-card-h {
+	padding: 14px 18px;
+	border-bottom-color: rgba(15, 23, 42, .06);
+	font-size: 13.5px;
+	letter-spacing: -0.005em;
+}
+.mwd-dash-row { padding: 10px 18px; border-bottom-color: rgba(15, 23, 42, .05); }
+.mwd-dash-mini-h { padding: 12px 18px 4px; font-size: 10.5px; letter-spacing: .06em; color: #a1a1aa; }
+
+/* KPI: eticheta + iconita neutra, valoare mare, variatie + mini-grafic */
+.mwd-dash-stats { gap: 12px; }
+.mwd-dash-stat {
+	display: flex;
+	flex-direction: column;
+	min-height: 128px;
+	padding: 16px 18px 0;
+	overflow: hidden;
+}
+.mwd-dash-stat:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 1px 3px rgba(16, 24, 40, .06), 0 12px 24px -12px rgba(16, 24, 40, .18);
+}
+.mwd-dash-stat-ico {
+	top: 14px;
+	right: 14px;
+	width: 30px;
+	height: 30px;
+	border-radius: 8px;
+	background: #f4f4f5;
+	color: #71717a;
+	box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .05);
+}
+.mwd-dash-stat-ico .dashicons { font-size: 16px; width: 16px; height: 16px; }
+.mwd-dash-stat-label { font-size: 12.5px; font-weight: 500; color: #71717a; }
+.mwd-dash-stat-num { margin-top: 8px; font-size: 26px; font-weight: 650; letter-spacing: -0.03em; }
+.mwd-dash-stat-foot { display: flex; align-items: center; gap: 6px; min-height: 20px; margin-top: 6px; }
+.mwd-dash-stat-foot .mwd-delta { flex: 0 0 auto; margin-left: 0; white-space: nowrap; }
+.mwd-dash-stat-vs { color: #a1a1aa; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mwd-dash-spark {
+	display: block;
+	width: calc(100% + 36px);
+	height: 30px;
+	margin: auto -18px 0;
+}
+.mwd-dash-spark .l { fill: none; stroke: var(--mwd-accent, #6d5efc); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.mwd-dash-spark .a { fill: var(--mwd-accent, #6d5efc); opacity: .08; }
+
+/* Grafic de trend: tab-uri si total in stilul nou */
+.mwd-dash-trend-tabs { border-radius: 10px; background: #f4f4f5; }
+.mwd-dash-trend-tab { border-radius: 7px; color: #71717a; }
+.mwd-dash-trend-total { font-weight: 650; letter-spacing: -0.03em; }
+
+/* Actiuni rapide */
+.mwd-dash-action { border-color: rgba(15, 23, 42, .08); border-radius: 9px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); }
+.mwd-dash-action .dashicons { color: #71717a; }
+.mwd-dash-action:hover { background: #fafafa; border-color: rgba(15, 23, 42, .16); }
+.mwd-dash-action:hover .dashicons { color: var(--mwd-accent, #6d5efc); }
+
+/* Variatii: pastile discrete */
+.mwd-delta { border-radius: 6px; padding: 1px 6px; }

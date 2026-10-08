@@ -48,6 +48,28 @@ class MWD_AS_Dashboard {
 	}
 
 	/**
+	 * Mini-grafic (tendinta) pentru cardurile KPI: linie 1.5px + arie discreta, SVG pur.
+	 */
+	private function sparkline( $vals ) {
+		$vals = array_map( 'floatval', array_values( (array) $vals ) );
+		$n    = count( $vals );
+		if ( $n < 2 ) {
+			return '';
+		}
+		$max = max( $vals );
+		$min = min( $vals );
+		$rng = $max - $min > 0 ? $max - $min : 1;
+		$pts = array();
+		foreach ( $vals as $i => $v ) {
+			$pts[] = round( $i * 100 / ( $n - 1 ), 2 ) . ',' . round( 28 - ( ( $v - $min ) / $rng ) * 24 - 2, 2 );
+		}
+		$line = 'M' . implode( ' L', $pts );
+		return '<svg class="mwd-dash-spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+			. '<path class="a" d="' . esc_attr( $line . ' L100,28 L0,28 Z' ) . '"/>'
+			. '<path class="l" d="' . esc_attr( $line ) . '"/></svg>';
+	}
+
+	/**
 	 * Numar compact pentru KPI-uri: 1.284 / 12,9K / 4,2M.
 	 */
 	private function compact( $n ) {
@@ -109,7 +131,7 @@ class MWD_AS_Dashboard {
 							<a class="mwd-dash-period-btn<?php echo $opt === $days ? ' is-active' : ''; ?>" href="<?php echo esc_url( admin_url( 'index.php?mwd_period=' . $opt ) ); ?>"><?php echo (int) $opt; ?> zile</a>
 						<?php endforeach; ?>
 					</div>
-					<a class="mwd-dash-btn" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener">Vezi site-ul</a>
+					<a class="mwd-dash-btn" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener">Vezi site-ul <span aria-hidden="true">↗</span></a>
 				</div>
 			</div>
 
@@ -119,8 +141,14 @@ class MWD_AS_Dashboard {
 						<span class="mwd-dash-stat-ico"><span class="dashicons <?php echo esc_attr( $s['icon'] ); ?>"></span></span>
 						<span class="mwd-dash-stat-label"><?php echo esc_html( $s['label'] ); ?></span>
 						<span class="mwd-dash-stat-num<?php echo ! empty( $s['accent'] ) ? ' is-accent' : ''; ?>"><?php echo esc_html( $s['value'] ); ?></span>
-						<?php if ( ! empty( $s['delta'] ) ) : ?>
-							<?php echo MWD_AS_Tracker::delta_badge( $s['delta'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<span class="mwd-dash-stat-foot">
+							<?php if ( ! empty( $s['delta'] ) ) : ?>
+								<?php echo MWD_AS_Tracker::delta_badge( $s['delta'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<span class="mwd-dash-stat-vs">vs. anterior</span>
+							<?php endif; ?>
+						</span>
+						<?php if ( ! empty( $s['spark'] ) ) : ?>
+							<?php echo $this->sparkline( $s['spark'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						<?php endif; ?>
 					</a>
 				<?php endforeach; ?>
@@ -162,8 +190,8 @@ class MWD_AS_Dashboard {
 		$orders = admin_url( MWD_AS_Woo::hpos() ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order' );
 
 		if ( $woo ) {
-			$k[] = array( 'label' => 'Vânzări', 'value' => $this->price_plain( $woo['sales_period'] ), 'icon' => 'dashicons-chart-line', 'url' => $orders, 'delta' => MWD_AS_Tracker::delta( $woo['sales_period'], $woo['prev']['sales_period'] ) );
-			$k[] = array( 'label' => 'Comenzi', 'value' => $this->compact( $woo['orders_period'] ), 'icon' => 'dashicons-cart', 'url' => $orders, 'delta' => MWD_AS_Tracker::delta( $woo['orders_period'], $woo['prev']['orders_period'] ) );
+			$k[] = array( 'label' => 'Vânzări', 'value' => $this->price_plain( $woo['sales_period'] ), 'icon' => 'dashicons-chart-line', 'url' => $orders, 'delta' => MWD_AS_Tracker::delta( $woo['sales_period'], $woo['prev']['sales_period'] ), 'spark' => $woo['sales_series'] );
+			$k[] = array( 'label' => 'Comenzi', 'value' => $this->compact( $woo['orders_period'] ), 'icon' => 'dashicons-cart', 'url' => $orders, 'delta' => MWD_AS_Tracker::delta( $woo['orders_period'], $woo['prev']['orders_period'] ), 'spark' => $woo['orders_series'] );
 			$k[] = array( 'label' => 'Valoare medie comandă', 'value' => $this->price_plain( $woo['aov'] ), 'icon' => 'dashicons-tag', 'url' => $orders, 'delta' => MWD_AS_Tracker::delta( $woo['aov'], $woo['prev']['aov'] ) );
 		} else {
 			$p   = wp_count_posts( 'post' );
@@ -176,7 +204,7 @@ class MWD_AS_Dashboard {
 		}
 
 		if ( $vis ) {
-			$k[] = array( 'label' => 'Vizite', 'value' => $this->compact( $vis['sessions'] ), 'icon' => 'dashicons-chart-area', 'url' => admin_url( 'admin.php?page=mwd-analytics&p=' . $days ), 'delta' => MWD_AS_Tracker::delta( $vis['sessions'], $vis['prev']['sessions'] ) );
+			$k[] = array( 'label' => 'Vizite', 'value' => $this->compact( $vis['sessions'] ), 'icon' => 'dashicons-chart-area', 'url' => admin_url( 'admin.php?page=mwd-analytics&p=' . $days ), 'delta' => MWD_AS_Tracker::delta( $vis['sessions'], $vis['prev']['sessions'] ), 'spark' => $vis['spark'] );
 			if ( $woo && $vis['sessions'] > 0 ) {
 				$rate = $woo['orders_period'] / $vis['sessions'] * 100;
 				$prev = $vis['prev']['sessions'] > 0 ? $woo['prev']['orders_period'] / $vis['prev']['sessions'] * 100 : 0;

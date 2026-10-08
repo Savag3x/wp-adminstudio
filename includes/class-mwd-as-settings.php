@@ -14,7 +14,7 @@ class MWD_AS_Settings {
 	 * Optiunile on/off (checkbox-uri) din formular.
 	 */
 	const BOOLEANS = array(
-		'enabled', 'style_login', 'style_adminbar', 'custom_dashboard', 'collapse_menu', 'auto_group',
+		'enabled', 'layout_canvas', 'style_login', 'style_adminbar', 'custom_dashboard', 'collapse_menu', 'auto_group',
 		'menu_accordion', 'hide_separators', 'cmd_palette', 'track_visitors', 'woo_cards', 'anonymize_ip',
 		'geo_lookup', 'hide_wp_version', 'hide_wp_logo', 'hide_notices', 'block_access', 'guard_exempt_admins',
 		'delete_on_uninstall',
@@ -633,6 +633,7 @@ class MWD_AS_Settings {
 									<?php
 									$this->switch_row( 'enabled', 'Activează skin-ul de admin', 'Aplică designul Admin Studio în tot panoul.', $o['enabled'] );
 									$this->switch_row( 'style_adminbar', 'Stilizează bara de admin', 'Bara de sus preia culorile sidebar-ului.', $o['style_adminbar'] );
+									$this->switch_row( 'layout_canvas', 'Layout „canvas"', 'Conținutul stă pe un panou rotunjit, încadrat de sidebar și bara de sus — aspect de aplicație.', $o['layout_canvas'] );
 									?>
 									<div class="mwd-as-field">
 										<span class="mwd-as-label">Densitate</span>
@@ -665,6 +666,8 @@ class MWD_AS_Settings {
 								<div class="mwd-as-presets" role="group" aria-label="Preseturi">
 									<?php
 									$presets = array(
+										'onyx'     => array( 'Onyx', '#0b0b0f', '#6d5efc' ),
+										'mono'     => array( 'Mono', '#f4f4f5', '#18181b' ),
 										'mwd'      => array( 'MyWebDesign', '#0f2744', '#10b981' ),
 										'midnight' => array( 'Midnight', '#0b0f19', '#6366f1' ),
 										'graphite' => array( 'Graphite', '#18181b', '#f97316' ),
@@ -1045,7 +1048,7 @@ class MWD_AS_Settings {
 									</div>
 									<div class="mwd-as-color-row">
 										<label for="login_bg">Fundal brand</label>
-										<input type="text" class="mwd-as-color" name="login_bg" id="login_bg" value="<?php echo esc_attr( $o['login_bg'] ); ?>" data-default-color="#0f2744" />
+										<input type="text" class="mwd-as-color" name="login_bg" id="login_bg" value="<?php echo esc_attr( $o['login_bg'] ); ?>" data-default-color="#0b0b0f" />
 									</div>
 								</div>
 								<div class="mwd-as-card">

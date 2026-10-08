@@ -31,7 +31,7 @@
 		var menu = document.getElementById( 'adminmenu' );
 		if ( ! menu ) { return out; }
 		Array.prototype.forEach.call( menu.children, function ( li ) {
-			if ( li.tagName !== 'LI' || li.classList.contains( 'wp-menu-separator' ) || li.classList.contains( 'mwd-sec' ) || li.id === 'collapse-menu' ) { return; }
+			if ( li.tagName !== 'LI' || li.classList.contains( 'wp-menu-separator' ) || li.classList.contains( 'mwd-sec' ) || li.classList.contains( 'mwd-shell' ) || li.id === 'collapse-menu' ) { return; }
 			var top = li.querySelector( 'a.menu-top' );
 			if ( ! top ) { return; }
 			var label = cleanText( top.querySelector( '.wp-menu-name' ) );

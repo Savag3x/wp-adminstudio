@@ -10,7 +10,8 @@
 
 	var essentials = cfg.essentials || [];
 	var groups = cfg.groups || [];
-	var anchor = document.getElementById( 'collapse-menu' ); // butonul „Restrânge meniul" rămâne ultimul
+	// Butonul „Restrânge meniul" (și cardul utilizatorului, dacă există) rămân ultimele.
+	var anchor = document.querySelector( '#adminmenu > li.mwd-me' ) || document.getElementById( 'collapse-menu' );
 	var sections = [];
 
 	/* ---------- Stare persistentă (per utilizator) ---------- */
@@ -42,7 +43,7 @@
 	/* ---------- Colectare item-e ---------- */
 	var items = [];
 	Array.prototype.forEach.call( menu.children, function ( c ) {
-		if ( c.tagName === 'LI' && c.classList.contains( 'menu-top' ) && ! c.classList.contains( 'wp-menu-separator' ) && c.id !== 'collapse-menu' ) {
+		if ( c.tagName === 'LI' && c.classList.contains( 'menu-top' ) && ! c.classList.contains( 'wp-menu-separator' ) && ! c.classList.contains( 'mwd-shell' ) && c.id !== 'collapse-menu' ) {
 			items.push( c );
 		}
 	} );

@@ -40,21 +40,23 @@ class MWD_AS_Defaults {
 			'delete_on_uninstall' => 0, // sterge tabelele + optiunile la dezinstalare
 
 			// Paleta
-			'sidebar_bg'     => '#0f2744', // navy
-			'sidebar_text'   => '#c7d2e0',
-			'accent'         => '#10b981', // emerald
-			'accent_hover'   => '#0ea371',
-			'content_bg'     => '#f4f6fb',
-			'link'           => '#0f2744',
+			// Preset „Onyx" (premium) pentru instalari noi; instalarile existente isi pastreaza paleta salvata.
+			'sidebar_bg'     => '#0b0b0f',
+			'sidebar_text'   => '#a1a1aa',
+			'accent'         => '#6d5efc',
+			'accent_hover'   => '#5b4bf0',
+			'content_bg'     => '#f7f7f8',
+			'link'           => '#4f46e5',
 
 			// Tipografie & forma
-			'font'           => 'Outfit',
+			'font'           => 'Inter',
 			'radius'         => 12, // px
 			'density'        => 'comfortable', // comfortable | compact
+			'layout_canvas'  => 1, // continut pe panou rotunjit, incadrat de sidebar + bara de sus
 
 			// Branding login
 			'login_logo_url' => '',
-			'login_bg'       => '#0f2744',
+			'login_bg'       => '#0b0b0f',
 			'login_layout'   => 'split', // split | center
 			'login_tagline'  => '',
 
