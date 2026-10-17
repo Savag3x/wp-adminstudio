@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.3.1
+- **Versiune:** 2.3.2
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,10 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.3.2
+
+- Dashboard: cardurile se așază în stil **masonry**, fără spații goale sub cardurile scurte (`assets/js/dashboard-masonry.js`: rânduri de 1px + `grid-auto-flow: dense`, recalculat automat când un card își schimbă înălțimea). Fără JavaScript rămâne grila obișnuită.
 
 ### 2.3.1
 

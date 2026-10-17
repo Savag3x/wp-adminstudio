@@ -503,3 +503,15 @@ a.mwd-dash-row:hover { background: rgba(var(--mwd-accent-rgb, 16, 185, 129), 0.0
 
 /* Variatii: pastile discrete */
 .mwd-delta { border-radius: 6px; padding: 1px 6px; }
+
+/* Masonry (activat de dashboard-masonry.js): rânduri de 1px, cardurile își calculează
+   singure câte rânduri ocupă; `dense` umple golurile de sub cardurile scurte. */
+.mwd-dash-grid.is-masonry {
+	grid-auto-rows: 1px;
+	grid-auto-flow: row dense;
+	row-gap: 0;
+	align-items: start;
+}
+.mwd-dash-grid.is-masonry > * {
+	margin-bottom: 0;
+}

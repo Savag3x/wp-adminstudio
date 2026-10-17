@@ -27,6 +27,7 @@ class MWD_AS_Dashboard {
 		}
 		wp_enqueue_style( 'mwd-as-dashboard', MWD_AS_URL . 'assets/css/dashboard.css', array(), MWD_AS_VERSION );
 		wp_enqueue_script( 'mwd-as-chart', MWD_AS_URL . 'assets/js/dashboard-chart.js', array(), MWD_AS_VERSION, true );
+		wp_enqueue_script( 'mwd-as-masonry', MWD_AS_URL . 'assets/js/dashboard-masonry.js', array(), MWD_AS_VERSION, true );
 
 		$opts = MWD_AS_Defaults::get_options();
 		if ( ! empty( $opts['track_visitors'] ) ) {
