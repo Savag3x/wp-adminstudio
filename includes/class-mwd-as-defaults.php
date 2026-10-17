@@ -33,7 +33,8 @@ class MWD_AS_Defaults {
 			'track_visitors'   => 1,
 			'woo_cards'        => 1,
 			'anonymize_ip'     => 1,
-			'geo_lookup'       => 0,
+			// Localizare tara / oras prin servicii HTTPS (dupa headere CDN si MaxMind local).
+			'geo_api'          => 1,
 			'exclude_ips'      => '',
 			'exclude_paths'    => '',
 			'retention_days'   => 120, // pastrarea datelor de analitice (30..730 zile)

@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.3.2
+- **Versiune:** 2.4.0
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,16 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.4.0 — analitice exacte
+
+- **IP real** (`includes/class-mwd-as-client.php`): headere Cloudflare / Sucuri / Akamai / Fastly / X-Real-IP, apoi primul IP **public** din X-Forwarded-For, apoi conexiunea directă; adresele sunt validate. Coloană nouă „IP" în tabel (anonimizat dacă opțiunea GDPR e activă).
+- **Țară, regiune, oraș**: headere CDN/server → baza MaxMind locală din WooCommerce → servicii HTTPS (freeipapi.com, ipwho.is, country.is; configurabile prin filtrul `mwd_as_geo_providers`), cu memorare 14 zile per IP. Activ implicit (opțiunea „Detectează țara / orașul prin servicii externe"). Steag + numele țării în tabel și în dashboard.
+- **Completare automată** a locației pentru vizitele vechi (lot orar prin WP-Cron) + buton „Completează locațiile lipsă" în pagina Analitice; funcționează și pe IP-uri anonimizate.
+- **Dispozitiv exact**: model (Samsung cu nume comercial, ex. SM-S918B → Galaxy S23 Ultra; Pixel, Xiaomi, OPPO/OnePlus, Huawei, Motorola…; modelul exact de iPhone din aplicațiile Instagram/Facebook), iPad care se prezintă drept Mac, versiuni reale de iOS / Android / Windows 11 / macOS și de browser (Client Hints), browsere din aplicații (Instagram, Facebook, TikTok, Google App), rezoluția ecranului, limba. Versiunile „înghețate" de Chrome nu mai sunt afișate ca reale.
+- Beacon-ul ignoră browserele automatizate (`navigator.webdriver`).
+- Tabel „Vizitatori recenți" nou: IP, locație, dispozitiv, browser/sistem, sursă (inclusiv UTM), **traseul vizitei** (paginile în ordine, cu ora și timpul pe pagină).
+- Export CSV de vizitatori cu toate câmpurile noi. Baza de date: versiunea 4 (coloane noi, adăugate automat la actualizare).
 
 ### 2.3.2
 

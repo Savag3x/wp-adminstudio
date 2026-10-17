@@ -13,6 +13,12 @@
 		return device === 'mobile' ? 'dashicons-smartphone' : ( device === 'tablet' ? 'dashicons-tablet' : 'dashicons-desktop' );
 	}
 
+	function flag( cc ) {
+		cc = String( cc || '' ).toUpperCase();
+		if ( ! /^[A-Z]{2}$/.test( cc ) || ! String.fromCodePoint ) { return ''; }
+		return String.fromCodePoint( 0x1F1E6 + cc.charCodeAt( 0 ) - 65, 0x1F1E6 + cc.charCodeAt( 1 ) - 65 );
+	}
+
 	function renderList( rows ) {
 		if ( ! list ) { return; }
 		list.textContent = '';
@@ -34,7 +40,7 @@
 			t.appendChild( document.createTextNode( ' ' + ( r.page || '/' ) ) );
 			var m = document.createElement( 'span' );
 			m.className = 'mwd-dash-row-m';
-			m.textContent = r.country || '—';
+			m.textContent = r.country ? flag( r.country ) + ' ' + r.country : '—';
 			row.appendChild( t );
 			row.appendChild( m );
 			list.appendChild( row );

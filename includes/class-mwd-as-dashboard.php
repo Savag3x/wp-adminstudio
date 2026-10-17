@@ -302,7 +302,7 @@ class MWD_AS_Dashboard {
 				<?php if ( $list ) : foreach ( $list as $v ) : ?>
 					<div class="mwd-dash-row">
 						<span class="mwd-dash-row-t mwd-dash-ellip"><span class="dashicons <?php echo esc_attr( 'mobile' === $v['device'] ? 'dashicons-smartphone' : ( 'tablet' === $v['device'] ? 'dashicons-tablet' : 'dashicons-desktop' ) ); ?>"></span> <?php echo esc_html( $v['page'] ); ?></span>
-						<span class="mwd-dash-row-m"><?php echo esc_html( $v['country'] ? $v['country'] : '—' ); ?></span>
+						<span class="mwd-dash-row-m"><?php echo esc_html( $v['country'] ? trim( MWD_AS_Client::flag( $v['country'] ) . ' ' . $v['country'] ) : '—' ); ?></span>
 					</div>
 				<?php endforeach; else : ?>
 					<p class="mwd-dash-empty">Niciun vizitator în ultimele 5 minute.</p>
@@ -451,7 +451,7 @@ class MWD_AS_Dashboard {
 			<?php if ( ! empty( $v['countries'] ) ) : ?>
 				<div class="mwd-dash-mini-h">Top țări</div>
 				<?php foreach ( $v['countries'] as $ct ) : ?>
-					<div class="mwd-dash-row"><span class="mwd-dash-row-t"><?php echo esc_html( $ct->country ); ?></span><span class="mwd-dash-row-m num"><?php echo esc_html( number_format_i18n( $ct->c ) ); ?></span></div>
+					<div class="mwd-dash-row"><span class="mwd-dash-row-t"><?php echo esc_html( trim( MWD_AS_Client::flag( $ct->country ) . ' ' . MWD_AS_Client::country_name( $ct->country ) ) ); ?></span><span class="mwd-dash-row-m num"><?php echo esc_html( number_format_i18n( $ct->c ) ); ?></span></div>
 				<?php endforeach; ?>
 			<?php endif; ?>
 		</div>

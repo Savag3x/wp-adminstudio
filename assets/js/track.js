@@ -45,8 +45,36 @@
 		} catch ( e ) {}
 	}
 
+	// Detalii despre dispozitiv: ecran, limba, ecran tactil (iPad se prezinta drept Mac) +
+	// Client Hints pe browserele Chromium (model real pe Android, versiuni reale de OS / browser).
+	function hints( done ) {
+		var h = {
+			sw: window.screen ? screen.width : 0,
+			sh: window.screen ? screen.height : 0,
+			tp: navigator.maxTouchPoints || 0,
+			lang: navigator.language || ''
+		};
+		var uad = navigator.userAgentData;
+		if ( ! uad || ! uad.getHighEntropyValues ) { done( h ); return; }
+		h.mob = !! uad.mobile;
+		var finished = false;
+		function finish() { if ( ! finished ) { finished = true; done( h ); } }
+		window.setTimeout( finish, 400 ); // nu intarziem afisarea daca browserul raspunde greu
+		uad.getHighEntropyValues( [ 'model', 'platformVersion', 'fullVersionList' ] ).then( function ( v ) {
+			h.m = v.model || '';
+			h.pv = v.platformVersion || '';
+			h.b = ( v.fullVersionList || [] ).map( function ( x ) { return { brand: x.brand, version: x.version }; } );
+			finish();
+		} ).catch( finish );
+	}
+
+	// Browsere automatizate (Puppeteer, Selenium etc.): nu sunt vizitatori.
+	if ( navigator.webdriver ) { return; }
+
 	// Afisarea de pagina
-	send( EP.hit, { uid: uid, sid: sid, n: isNew, u: path, t: document.title, r: document.referrer, us: param( 'utm_source' ), um: param( 'utm_medium' ), uc: param( 'utm_campaign' ) } );
+	hints( function ( h ) {
+		send( EP.hit, { uid: uid, sid: sid, n: isNew, u: path, t: document.title, r: document.referrer, us: param( 'utm_source' ), um: param( 'utm_medium' ), uc: param( 'utm_campaign' ), h: h } );
+	} );
 
 	// Timp activ pe pagina
 	var active = 0, last = Date.now(), visible = ! document.hidden;

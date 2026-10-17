@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class MWD_AS_Tracker {
 
-	const DB_VERSION    = '3';
+	const DB_VERSION    = '4';
 	const RETENTION_DAYS = 120;
 	const NS            = 'mwd-analytics/v1';
 
@@ -66,7 +66,13 @@ class MWD_AS_Tracker {
 			device VARCHAR(10) NOT NULL DEFAULT 'desktop',
 			browser VARCHAR(40) NOT NULL DEFAULT '',
 			os VARCHAR(40) NOT NULL DEFAULT '',
+			model VARCHAR(80) NOT NULL DEFAULT '',
+			os_ver VARCHAR(24) NOT NULL DEFAULT '',
+			browser_ver VARCHAR(24) NOT NULL DEFAULT '',
+			screen VARCHAR(16) NOT NULL DEFAULT '',
+			lang VARCHAR(16) NOT NULL DEFAULT '',
 			country CHAR(2) NOT NULL DEFAULT '',
+			region VARCHAR(64) NOT NULL DEFAULT '',
 			city VARCHAR(64) NOT NULL DEFAULT '',
 			referrer VARCHAR(255) NOT NULL DEFAULT '',
 			utm_source VARCHAR(100) NOT NULL DEFAULT '',
@@ -109,6 +115,12 @@ class MWD_AS_Tracker {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_beacon' ) );
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
 		add_action( 'mwd_as_cleanup', array( __CLASS__, 'cleanup' ) );
+		// Completeaza tara / orasul pentru vizitele inregistrate fara locatie (ex. inainte de 2.4).
+		add_action( 'mwd_as_geo_backfill', array( __CLASS__, 'backfill_geo' ) );
+		add_action( 'admin_post_mwd_as_geo_backfill', array( $this, 'backfill_now' ) );
+		if ( ! wp_next_scheduled( 'mwd_as_geo_backfill' ) ) {
+			wp_schedule_event( time() + 300, 'hourly', 'mwd_as_geo_backfill' );
+		}
 		add_action( 'admin_menu', array( $this, 'admin_page' ), 20 );
 	}
 
@@ -223,9 +235,10 @@ class MWD_AS_Tracker {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( $wpdb->prepare( "UPDATE {$st} SET pageviews = pageviews + 1, exit_url = %s, updated_at = %s WHERE id = %d", $url, $now, $session->id ) );
 		} else {
-			$ua  = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
+			$ua  = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$ip  = $raw_ip;
-			$geo = $this->geo( $ip );
+			$geo = MWD_AS_Client::geo( $ip ); // pe IP-ul complet, inainte de anonimizare
+			$dev = MWD_AS_Client::parse( $ua, isset( $p['h'] ) && is_array( $p['h'] ) ? $p['h'] : array() );
 
 			// Recurent? (uid vazut inainte)
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -237,10 +250,16 @@ class MWD_AS_Tracker {
 					'uid'          => $uid,
 					'sid'          => $sid,
 					'ip'           => $this->mask_ip( $ip ),
-					'device'       => $this->device( $ua ),
-					'browser'      => $this->browser( $ua ),
-					'os'           => $this->os( $ua ),
+					'device'       => $dev['device'],
+					'browser'      => $dev['browser'],
+					'os'           => $dev['os'],
+					'model'        => $dev['model'],
+					'os_ver'       => $dev['os_ver'],
+					'browser_ver'  => $dev['browser_ver'],
+					'screen'       => $dev['screen'],
+					'lang'         => $dev['lang'],
 					'country'      => $geo['country'],
+					'region'       => $geo['region'],
 					'city'         => $geo['city'],
 					'referrer'     => $ref,
 					'utm_source'   => isset( $p['us'] ) ? substr( sanitize_text_field( (string) $p['us'] ), 0, 100 ) : '',
@@ -305,14 +324,7 @@ class MWD_AS_Tracker {
 	}
 
 	public static function current_ip() {
-		if ( ! empty( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
-			return (string) $_SERVER['HTTP_CF_CONNECTING_IP'];
-		}
-		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$parts = explode( ',', (string) $_SERVER['HTTP_X_FORWARDED_FOR'] );
-			return trim( $parts[0] );
-		}
-		return isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+		return MWD_AS_Client::ip();
 	}
 
 	private static function lines( $text ) {
@@ -373,36 +385,6 @@ class MWD_AS_Tracker {
 		return '';
 	}
 
-	private function geo( $ip ) {
-		$out = array( 'country' => '', 'city' => '' );
-		if ( ! empty( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
-			$c = strtoupper( substr( (string) $_SERVER['HTTP_CF_IPCOUNTRY'], 0, 2 ) );
-			if ( 'XX' !== $c && 'T1' !== $c ) {
-				$out['country'] = $c;
-			}
-		}
-
-		$o = MWD_AS_Defaults::get_options();
-		if ( ( '' === $out['country'] || empty( $out['city'] ) ) && ! empty( $o['geo_lookup'] ) && $ip ) {
-			$key    = 'mwd_as_geo_' . md5( $ip );
-			$cached = get_transient( $key );
-			if ( false !== $cached ) {
-				return $cached;
-			}
-			$resp = wp_remote_get( 'http://ip-api.com/json/' . rawurlencode( $ip ) . '?fields=status,countryCode,city', array( 'timeout' => 2 ) );
-			if ( ! is_wp_error( $resp ) ) {
-				$body = json_decode( wp_remote_retrieve_body( $resp ), true );
-				if ( isset( $body['status'] ) && 'success' === $body['status'] ) {
-					$out['country'] = $out['country'] ? $out['country'] : strtoupper( substr( (string) $body['countryCode'], 0, 2 ) );
-					$out['city']    = substr( (string) $body['city'], 0, 64 );
-				}
-			}
-			set_transient( $key, $out, DAY_IN_SECONDS );
-		}
-
-		return $out;
-	}
-
 	private function referrer_host( $ref ) {
 		if ( ! $ref ) {
 			return '';
@@ -412,57 +394,6 @@ class MWD_AS_Tracker {
 			return '';
 		}
 		return substr( preg_replace( '/^www\./', '', $host ), 0, 255 );
-	}
-
-	private function device( $ua ) {
-		$ua = strtolower( $ua );
-		if ( preg_match( '/ipad|tablet|playbook|silk|(android(?!.*mobile))/i', $ua ) ) {
-			return 'tablet';
-		}
-		if ( preg_match( '/mobile|iphone|ipod|android.*mobile|windows phone/i', $ua ) ) {
-			return 'mobile';
-		}
-		return 'desktop';
-	}
-
-	private function browser( $ua ) {
-		$map = array(
-			'Edg'      => 'Edge',
-			'OPR'      => 'Opera',
-			'Opera'    => 'Opera',
-			'Chrome'   => 'Chrome',
-			'CriOS'    => 'Chrome',
-			'Firefox'  => 'Firefox',
-			'FxiOS'    => 'Firefox',
-			'Safari'   => 'Safari',
-			'MSIE'     => 'Internet Explorer',
-			'Trident'  => 'Internet Explorer',
-		);
-		foreach ( $map as $needle => $name ) {
-			if ( false !== stripos( $ua, $needle ) ) {
-				return $name;
-			}
-		}
-		return 'Altul';
-	}
-
-	private function os( $ua ) {
-		$checks = array(
-			'Windows'      => 'Windows',
-			'Android'      => 'Android',
-			'iPhone'       => 'iOS',
-			'iPad'         => 'iOS',
-			'Mac OS X'     => 'macOS',
-			'Macintosh'    => 'macOS',
-			'Linux'        => 'Linux',
-			'CrOS'         => 'ChromeOS',
-		);
-		foreach ( $checks as $needle => $name ) {
-			if ( false !== stripos( $ua, $needle ) ) {
-				return $name;
-			}
-		}
-		return 'Altul';
 	}
 
 	private function is_bot() {
@@ -545,6 +476,57 @@ class MWD_AS_Tracker {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Completeaza locatia pentru sesiunile fara tara (cate un lot mic, pe IP-uri distincte).
+	 * Functioneaza si pe IP-uri anonimizate (ex. 86.120.4.0): tara si orasul raman corecte.
+	 *
+	 * @return int Numarul de IP-uri rezolvate.
+	 */
+	public static function backfill_geo( $limit = 25 ) {
+		if ( ! self::ready() ) {
+			return 0;
+		}
+		global $wpdb;
+		$st = self::sessions_table();
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$ips = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ip FROM {$st} WHERE country = '' AND ip <> '' AND started_at >= %s GROUP BY ip ORDER BY MAX(started_at) DESC LIMIT %d",
+				gmdate( 'Y-m-d H:i:s', strtotime( '-' . self::retention_days() . ' days' ) ),
+				(int) $limit
+			)
+		);
+		$done = 0;
+		foreach ( (array) $ips as $ip ) {
+			$g = MWD_AS_Client::geo( $ip, false );
+			if ( '' === $g['country'] ) {
+				continue;
+			}
+			$wpdb->query( $wpdb->prepare( "UPDATE {$st} SET country = %s, region = %s, city = %s WHERE ip = %s AND country = ''", $g['country'], $g['region'], $g['city'], $ip ) );
+			$done++;
+		}
+		// phpcs:enable
+		if ( $done ) {
+			foreach ( array( 7, 14, 30 ) as $d ) {
+				delete_transient( 'mwd_as_an_sum2_' . $d );
+			}
+		}
+		return $done;
+	}
+
+	/**
+	 * Buton „Completează locațiile" din pagina Analitice.
+	 */
+	public function backfill_now() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Acces interzis.' );
+		}
+		check_admin_referer( 'mwd_as_geo_backfill' );
+		$n = self::backfill_geo( 60 );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'mwd-analytics', 'geo' => (int) $n ), admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	public static function cleanup() {
@@ -790,31 +772,126 @@ class MWD_AS_Tracker {
 				<?php endforeach; ?>
 			</div>
 
-			<h2 class="mwd-an-h2">Vizitatori recenți</h2>
-			<table class="widefat striped mwd-an-table">
+			<?php
+			// Traseul fiecarei vizite (paginile in ordine), dintr-o singura interogare.
+			$paths = array();
+			if ( $rows ) {
+				global $wpdb;
+				$vt   = self::views_table();
+				$sids = array_values( array_unique( wp_list_pluck( $rows, 'sid' ) ) );
+				$ph   = implode( ',', array_fill( 0, count( $sids ), '%s' ) );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				$vrows = $wpdb->get_results( $wpdb->prepare( "SELECT sid, url, title, duration, created_at FROM {$vt} WHERE sid IN ($ph) ORDER BY id ASC", $sids ) );
+				foreach ( (array) $vrows as $v ) {
+					$paths[ $v->sid ][] = $v;
+				}
+			}
+			$missing = 0;
+			foreach ( (array) $rows as $r ) {
+				$missing += '' === $r->country ? 1 : 0;
+			}
+			$opts      = MWD_AS_Defaults::get_options();
+			$geo_done  = isset( $_GET['geo'] ) ? (int) $_GET['geo'] : -1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$dev_icons = array( 'mobile' => 'dashicons-smartphone', 'tablet' => 'dashicons-tablet', 'desktop' => 'dashicons-desktop' );
+			$dev_names = array( 'mobile' => 'Telefon', 'tablet' => 'Tabletă', 'desktop' => 'Desktop' );
+			?>
+
+			<div class="mwd-an-head">
+				<h2 class="mwd-an-h2">Vizitatori recenți</h2>
+				<?php if ( $missing ) : ?>
+					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=mwd_as_geo_backfill' ), 'mwd_as_geo_backfill' ) ); ?>"><span class="dashicons dashicons-location" style="vertical-align:-4px"></span> Completează locațiile lipsă (<?php echo (int) $missing; ?>)</a>
+				<?php endif; ?>
+			</div>
+			<?php if ( $geo_done >= 0 ) : ?>
+				<div class="notice notice-<?php echo $geo_done ? 'success' : 'warning'; ?> inline"><p>
+					<?php
+					echo $geo_done
+						? esc_html( sprintf( 'Am completat locația pentru %d adrese IP.', $geo_done ) )
+						: esc_html( empty( $opts['geo_api'] ) ? 'Activează „Detectează țara / orașul prin servicii externe" din Admin Studio → Dashboard & date.' : 'Nu am putut obține locația acum (serviciile externe nu au răspuns). Se reîncearcă automat în fiecare oră.' );
+					?>
+				</p></div>
+			<?php endif; ?>
+
+			<div class="mwd-an-table-wrap">
+			<table class="widefat mwd-an-table mwd-an-visits">
 				<thead>
 					<tr>
-						<th>Data</th><th>Țară</th><th>Dispozitiv</th><th>Browser / OS</th><th>Sursă</th><th>Pagină intrare</th><th>Pagini</th><th>Durată</th><th>Tip</th>
+						<th>Data</th><th>IP</th><th>Locație</th><th>Dispozitiv</th><th>Browser / sistem</th><th>Sursă</th><th>Traseu</th><th class="num">Durată</th><th>Tip</th>
 					</tr>
 				</thead>
 				<tbody>
-					<?php if ( $rows ) : foreach ( $rows as $r ) : ?>
+					<?php
+					if ( $rows ) :
+						foreach ( $rows as $r ) :
+							$model   = isset( $r->model ) ? $r->model : '';
+							$screen  = isset( $r->screen ) ? $r->screen : '';
+							$os      = trim( $r->os . ( ! empty( $r->os_ver ) ? ' ' . $r->os_ver : '' ) );
+							$browser = trim( $r->browser . ( ! empty( $r->browser_ver ) ? ' ' . $r->browser_ver : '' ) );
+							$place   = array_filter( array( isset( $r->city ) ? $r->city : '', isset( $r->region ) && $r->region !== $r->city ? $r->region : '' ) );
+							$steps   = isset( $paths[ $r->sid ] ) ? $paths[ $r->sid ] : array();
+							$src     = $r->utm_source ? $r->utm_source . ( $r->utm_campaign ? ' · ' . $r->utm_campaign : '' ) : ( $r->referrer ? $r->referrer : 'Direct' );
+							?>
 						<tr>
-							<td class="num"><?php echo esc_html( date_i18n( 'j M, H:i', strtotime( $r->started_at ) ) ); ?></td>
-							<td><?php echo esc_html( $r->country ? $r->country . ( $r->city ? ' · ' . $r->city : '' ) : '—' ); ?></td>
-							<td><?php echo esc_html( ucfirst( $r->device ) ); ?></td>
-							<td><?php echo esc_html( trim( $r->browser . ' / ' . $r->os, ' /' ) ); ?></td>
-							<td><?php echo esc_html( $r->referrer ? $r->referrer : 'Direct' ); ?></td>
-							<td class="mwd-an-ellip"><?php echo esc_html( $r->entry_url ); ?></td>
-							<td class="num"><?php echo esc_html( number_format_i18n( $r->pageviews ) ); ?></td>
+							<td class="num mwd-an-nowrap"><?php echo esc_html( date_i18n( 'j M, H:i', strtotime( $r->started_at ) ) ); ?></td>
+							<td><code class="mwd-an-ip"><?php echo esc_html( $r->ip ? $r->ip : '—' ); ?></code></td>
+							<td>
+								<?php if ( $r->country ) : ?>
+									<span class="mwd-an-place">
+										<span class="mwd-an-flag" aria-hidden="true"><?php echo esc_html( MWD_AS_Client::flag( $r->country ) ); ?></span>
+										<span>
+											<strong><?php echo esc_html( MWD_AS_Client::country_name( $r->country ) ); ?></strong>
+											<?php if ( $place ) : ?><small><?php echo esc_html( implode( ', ', $place ) ); ?></small><?php endif; ?>
+										</span>
+									</span>
+								<?php else : ?>
+									<span class="mwd-an-muted">necunoscută</span>
+								<?php endif; ?>
+							</td>
+							<td>
+								<span class="mwd-an-dev">
+									<span class="dashicons <?php echo esc_attr( isset( $dev_icons[ $r->device ] ) ? $dev_icons[ $r->device ] : 'dashicons-desktop' ); ?>" aria-hidden="true"></span>
+									<span>
+										<strong><?php echo esc_html( $model ? $model : ( isset( $dev_names[ $r->device ] ) ? $dev_names[ $r->device ] : ucfirst( $r->device ) ) ); ?></strong>
+										<?php if ( $screen ) : ?><small><?php echo esc_html( $screen ); ?></small><?php endif; ?>
+									</span>
+								</span>
+							</td>
+							<td>
+								<span class="mwd-an-stack">
+									<span><?php echo esc_html( $browser ); ?></span>
+									<small><?php echo esc_html( $os ); ?><?php echo ! empty( $r->lang ) ? ' · ' . esc_html( $r->lang ) : ''; ?></small>
+								</span>
+							</td>
+							<td class="mwd-an-ellip"><?php echo esc_html( $src ); ?></td>
+							<td class="mwd-an-path">
+								<?php if ( count( $steps ) > 1 ) : ?>
+									<details>
+										<summary><span class="mwd-an-ellip"><?php echo esc_html( $r->entry_url ); ?></span> <span class="mwd-an-count">+<?php echo (int) ( count( $steps ) - 1 ); ?></span></summary>
+										<ol>
+											<?php foreach ( $steps as $st ) : ?>
+												<li><span class="mwd-an-time"><?php echo esc_html( date_i18n( 'H:i', strtotime( $st->created_at ) ) ); ?></span> <span class="mwd-an-ellip" title="<?php echo esc_attr( $st->title ); ?>"><?php echo esc_html( $st->url ); ?></span> <span class="mwd-an-muted"><?php echo esc_html( self::fmt_time( $st->duration ) ); ?></span></li>
+											<?php endforeach; ?>
+										</ol>
+									</details>
+								<?php else : ?>
+									<span class="mwd-an-ellip"><?php echo esc_html( $r->entry_url ); ?></span>
+								<?php endif; ?>
+							</td>
 							<td class="num"><?php echo esc_html( self::fmt_time( $r->duration ) ); ?></td>
-							<td><?php echo $r->is_returning ? '<span class="mwd-an-tag">recurent</span>' : 'nou'; ?></td>
+							<td><?php echo $r->is_returning ? '<span class="mwd-an-tag">recurent</span>' : '<span class="mwd-an-muted">nou</span>'; ?></td>
 						</tr>
-					<?php endforeach; else : ?>
+							<?php
+						endforeach;
+					else :
+						?>
 						<tr><td colspan="9">Încă fără date pentru perioada selectată.</td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>
+			</div>
+			<?php if ( ! empty( $opts['anonymize_ip'] ) ) : ?>
+				<p class="description">IP-urile sunt anonimizate (ultimul octet = 0). Pentru IP complet, dezactivează „Anonimizează IP-ul" din Admin Studio → Dashboard & date.</p>
+			<?php endif; ?>
 
 			<h2 class="mwd-an-h2">Top pagini (cu timp mediu)</h2>
 			<table class="widefat striped mwd-an-table">

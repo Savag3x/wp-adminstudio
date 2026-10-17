@@ -3,7 +3,7 @@
  * Plugin Name:       MWD Admin Studio
  * Plugin URI:        https://mywebdesign.ro/
  * Description:       Reskin SaaS complet al panoului de administrare WordPress: design modern, paleta de comenzi (⌘K), meniu organizat pe sectiuni, manager de meniu/coloane pe roluri, login restilizat, dashboard si analitice.
- * Version:           2.3.2
+ * Version:           2.4.0
  * Author:            Alexandru Raileanu / MyWebDesign.ro
  * Author URI:        https://mywebdesign.ro/
  * Text Domain:       mwd-admin-studio
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MWD_AS_VERSION', '2.3.2' );
+define( 'MWD_AS_VERSION', '2.4.0' );
 define( 'MWD_AS_FILE', __FILE__ );
 define( 'MWD_AS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MWD_AS_URL', plugin_dir_url( __FILE__ ) );
@@ -34,6 +34,7 @@ require_once MWD_AS_DIR . 'includes/class-mwd-as-styler.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-menu.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-login.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-dashboard.php';
+require_once MWD_AS_DIR . 'includes/class-mwd-as-client.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-tracker.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-woo.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-branding.php';
@@ -131,9 +132,7 @@ register_activation_hook( __FILE__, 'mwd_as_activate' );
  * La dezactivare: opreste cron-ul de curatare.
  */
 function mwd_as_deactivate() {
-	$ts = wp_next_scheduled( 'mwd_as_cleanup' );
-	if ( $ts ) {
-		wp_unschedule_event( $ts, 'mwd_as_cleanup' );
-	}
+	wp_clear_scheduled_hook( 'mwd_as_cleanup' );
+	wp_clear_scheduled_hook( 'mwd_as_geo_backfill' );
 }
 register_deactivation_hook( __FILE__, 'mwd_as_deactivate' );

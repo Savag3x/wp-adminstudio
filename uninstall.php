@@ -25,3 +25,5 @@ delete_option( 'mwd_as_settings' );
 delete_option( 'mwd_as_columns_cache' );
 delete_option( 'mwd_as_db_version' );
 wp_clear_scheduled_hook( 'mwd_as_cleanup' );
+wp_clear_scheduled_hook( 'mwd_as_geo_backfill' );
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_mwd\_as\_geo%' OR option_name LIKE '\_transient\_timeout\_mwd\_as\_geo%'" ); // phpcs:ignore

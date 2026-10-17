@@ -16,7 +16,7 @@ class MWD_AS_Settings {
 	const BOOLEANS = array(
 		'enabled', 'layout_canvas', 'style_login', 'style_adminbar', 'custom_dashboard', 'collapse_menu', 'auto_group',
 		'menu_accordion', 'hide_separators', 'cmd_palette', 'track_visitors', 'woo_cards', 'anonymize_ip',
-		'geo_lookup', 'hide_wp_version', 'hide_wp_logo', 'hide_notices', 'block_access', 'guard_exempt_admins',
+		'geo_api', 'hide_wp_version', 'hide_wp_logo', 'hide_notices', 'block_access', 'guard_exempt_admins',
 		'delete_on_uninstall',
 	);
 
@@ -970,8 +970,8 @@ class MWD_AS_Settings {
 									<h3>Analitice</h3>
 									<?php
 									$this->switch_row( 'track_visitors', 'Tracker vizitatori', 'Sesiuni, afișări, surse și timp pe pagină — fără servicii externe.', $o['track_visitors'] );
-									$this->switch_row( 'anonymize_ip', 'Anonimizează IP-ul (GDPR)', 'Ultimul octet al IP-ului nu se stochează.', $o['anonymize_ip'] );
-									$this->switch_row( 'geo_lookup', 'Detectează țara / orașul', 'Folosește ip-api.com când Cloudflare nu trimite țara.', $o['geo_lookup'] );
+									$this->switch_row( 'anonymize_ip', 'Anonimizează IP-ul (GDPR)', 'Ultimul octet nu se stochează (ex. 86.120.4.0) — țara și orașul rămân corecte. Dezactivează pentru IP complet; menționează asta în politica de confidențialitate.', $o['anonymize_ip'] );
+									$this->switch_row( 'geo_api', 'Detectează țara / orașul prin servicii externe', 'Când serverul / CDN-ul sau baza MaxMind din WooCommerce nu dau locația, IP-ul e trimis (HTTPS) la freeipapi.com / ipwho.is. Rezultatul se memorează 14 zile per IP.', $o['geo_api'] );
 									?>
 									<div class="mwd-as-field">
 										<label class="mwd-as-label" for="retention_days">Păstrează datele <small>(30–730 zile)</small></label>

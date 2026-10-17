@@ -89,7 +89,7 @@ class MWD_AS_Export {
 		header( 'Content-Disposition: attachment; filename=vizitatori-' . gmdate( 'Y-m-d' ) . '.csv' );
 
 		$out = fopen( 'php://output', 'w' );
-		fputcsv( $out, array( 'Data', 'IP', 'Dispozitiv', 'Browser', 'OS', 'Tara', 'Oras', 'Sursa', 'Pagina intrare', 'Pagini', 'Durata(s)', 'Recurent' ) );
+		fputcsv( $out, array( 'Data', 'IP', 'Dispozitiv', 'Model', 'Browser', 'Versiune browser', 'OS', 'Versiune OS', 'Ecran', 'Limba', 'Tara', 'Regiune', 'Oras', 'Sursa', 'Pagina intrare', 'Pagini', 'Durata(s)', 'Recurent' ) );
 
 		if ( MWD_AS_Tracker::ready() ) {
 			// In loturi (pe id descrescator), ca exportul sa nu incarce zeci de mii de randuri in memorie.
@@ -97,7 +97,7 @@ class MWD_AS_Export {
 			$total = 0;
 			do {
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, started_at, ip, device, browser, os, country, city, referrer, entry_url, pageviews, duration, is_returning FROM {$table} WHERE id < %d ORDER BY id DESC LIMIT 2000", $last ), ARRAY_A );
+				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, started_at, ip, device, model, browser, browser_ver, os, os_ver, screen, lang, country, region, city, referrer, entry_url, pageviews, duration, is_returning FROM {$table} WHERE id < %d ORDER BY id DESC LIMIT 2000", $last ), ARRAY_A );
 				foreach ( $rows as $r ) {
 					$last = (int) $r['id'];
 					unset( $r['id'] );

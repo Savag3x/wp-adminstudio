@@ -943,3 +943,26 @@ body.mwd-as-active .mwd-an-pbtn.is-active, body.mwd-as-active .mwd-an-pbtn.is-ac
 .mwd-an-kpi .mwd-delta.up { color: #047857; background: rgba(16,185,129,.12); }
 .mwd-an-kpi .mwd-delta.down { color: #b91c1c; background: rgba(239,68,68,.1); }
 .mwd-an-kpi .mwd-delta.flat { color: #64748b; background: #f1f5f9; }
+
+/* Analitice — tabelul de vizite detaliat */
+.mwd-an-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 26px 0 10px; }
+.mwd-an-head .mwd-an-h2 { margin: 0; }
+.mwd-an-table-wrap { overflow-x: auto; }
+.mwd-an-visits td { vertical-align: middle; }
+.mwd-an-visits small { display: block; color: #71717a; font-size: 11.5px; line-height: 1.4; }
+.mwd-an-nowrap { white-space: nowrap; }
+.mwd-an-ip { padding: 2px 6px; border-radius: 6px; background: #f4f4f5; color: #3f3f46; font-size: 11.5px; white-space: nowrap; }
+.mwd-an-place, .mwd-an-dev { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mwd-an-place strong, .mwd-an-dev strong { display: block; font-weight: 600; color: #18181b; white-space: nowrap; }
+.mwd-an-flag { font-size: 20px; line-height: 1; }
+.mwd-an-dev .dashicons { flex: 0 0 auto; color: #a1a1aa; }
+.mwd-an-stack { display: flex; flex-direction: column; white-space: nowrap; }
+.mwd-an-muted { color: #a1a1aa; }
+.mwd-an-path { min-width: 180px; max-width: 320px; }
+.mwd-an-path details summary { display: flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; }
+.mwd-an-path details summary::-webkit-details-marker { display: none; }
+.mwd-an-path .mwd-an-ellip { display: inline-block; max-width: 230px; vertical-align: bottom; }
+.mwd-an-count { flex: 0 0 auto; padding: 1px 7px; border-radius: 999px; background: rgba(var(--mwd-accent-rgb, 16, 185, 129), .12); color: #18181b; font-size: 11px; font-weight: 600; }
+.mwd-an-path ol { margin: 8px 0 2px 18px; padding: 0; }
+.mwd-an-path li { margin: 3px 0; font-size: 12px; white-space: nowrap; }
+.mwd-an-time { color: #a1a1aa; font-variant-numeric: tabular-nums; margin-right: 4px; }
