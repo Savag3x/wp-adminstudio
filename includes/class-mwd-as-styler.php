@@ -10,6 +10,7 @@ class MWD_AS_Styler {
 
 	public function hooks() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin' ), 99 );
+		add_action( 'admin_head', array( $this, 'preconnect' ), 1 );
 		add_action( 'admin_body_class', array( $this, 'body_class' ) );
 	}
 
@@ -51,6 +52,19 @@ class MWD_AS_Styler {
 	private function applies() {
 		$role = MWD_AS_Defaults::user_role();
 		return MWD_AS_Defaults::skin_applies_to( $role );
+	}
+
+	/**
+	 * Conexiune anticipata catre Google Fonts: fontul ajunge mai repede (adminul nu tipareste resource hints).
+	 */
+	public function preconnect() {
+		$opts  = MWD_AS_Defaults::get_options();
+		$fonts = MWD_AS_Defaults::fonts();
+		if ( ! $this->applies() || empty( $fonts[ $opts['font'] ][1] ) ) {
+			return;
+		}
+		echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+		echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
 	}
 
 	public function enqueue_admin() {

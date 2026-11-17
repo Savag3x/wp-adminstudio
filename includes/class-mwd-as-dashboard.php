@@ -9,9 +9,78 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class MWD_AS_Dashboard {
 
+	/**
+	 * Cardurile pe care utilizatorul le poate ascunde (cheie => eticheta).
+	 */
+	const CARDS = array(
+		'kpis'        => 'Indicatori (KPI)',
+		'trend'       => 'Grafic de trend',
+		'live'        => 'Acum pe site',
+		'woo'         => 'WooCommerce',
+		'visitors'    => 'Vizitatori',
+		'stock'       => 'Stoc & top produse',
+		'attribution' => 'Atribuire vânzări',
+		'orders'      => 'Comenzi recente',
+		'content'     => 'Conținut recent',
+		'actions'     => 'Acțiuni rapide',
+		'health'      => 'Sănătate site',
+	);
+
+	const META = 'mwd_as_dash_hidden';
+
 	public function hooks() {
 		add_action( 'wp_dashboard_setup', array( $this, 'setup' ), 9999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
+		add_action( 'rest_api_init', array( $this, 'routes' ) );
+	}
+
+	/**
+	 * Preferintele de afisare ale utilizatorului (salvate prin REST, per utilizator).
+	 */
+	public function routes() {
+		register_rest_route(
+			MWD_AS_Tracker::NS,
+			'/dash-prefs',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => function () {
+					return current_user_can( 'read' );
+				},
+				'callback'            => function ( $request ) {
+					$hidden = array_values( array_intersect( array_map( 'sanitize_key', (array) $request->get_param( 'hidden' ) ), array_keys( self::CARDS ) ) );
+					update_user_meta( get_current_user_id(), self::META, $hidden );
+					return new WP_REST_Response( array( 'hidden' => $hidden ), 200 );
+				},
+			)
+		);
+	}
+
+	private function hidden() {
+		static $h = null;
+		if ( null === $h ) {
+			$h = (array) get_user_meta( get_current_user_id(), self::META, true );
+		}
+		return $h;
+	}
+
+	private function visible( $key ) {
+		return ! in_array( $key, $this->hidden(), true );
+	}
+
+	/**
+	 * Randeaza un card intr-un „slot" etichetat (pentru ascundere instantanee din JS).
+	 * Cardurile ascunse nu se randeaza deloc — deci nici interogarile lor nu ruleaza.
+	 */
+	private function slot( $key, $render ) {
+		if ( ! $this->visible( $key ) ) {
+			return;
+		}
+		ob_start();
+		call_user_func( $render );
+		$html = trim( (string) ob_get_clean() );
+		if ( '' !== $html ) {
+			echo '<div class="mwd-dash-slot" data-card="' . esc_attr( $key ) . '">' . $html . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- HTML-ul cardului e deja escapat.
+		}
 	}
 
 	public function setup() {
@@ -28,6 +97,7 @@ class MWD_AS_Dashboard {
 		wp_enqueue_style( 'mwd-as-dashboard', MWD_AS_URL . 'assets/css/dashboard.css', array(), MWD_AS_VERSION );
 		wp_enqueue_script( 'mwd-as-chart', MWD_AS_URL . 'assets/js/dashboard-chart.js', array(), MWD_AS_VERSION, true );
 		wp_enqueue_script( 'mwd-as-masonry', MWD_AS_URL . 'assets/js/dashboard-masonry.js', array(), MWD_AS_VERSION, true );
+		wp_enqueue_script( 'mwd-as-dash-custom', MWD_AS_URL . 'assets/js/dashboard-custom.js', array(), MWD_AS_VERSION, true );
 
 		$opts = MWD_AS_Defaults::get_options();
 		if ( ! empty( $opts['track_visitors'] ) ) {
@@ -150,10 +220,21 @@ class MWD_AS_Dashboard {
 						<?php endforeach; ?>
 					</div>
 					<a class="mwd-dash-btn" href="<?php echo esc_url( home_url( '/' ) ); ?>" target="_blank" rel="noopener">Vezi site-ul <span aria-hidden="true">↗</span></a>
+					<details class="mwd-dash-custom">
+						<summary class="mwd-dash-btn" aria-label="Personalizează dashboard-ul"><span class="dashicons dashicons-admin-settings" aria-hidden="true"></span> Personalizează</summary>
+						<div class="mwd-dash-custom-menu" data-url="<?php echo esc_url( rest_url( MWD_AS_Tracker::NS . '/dash-prefs' ) ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'wp_rest' ) ); ?>">
+							<div class="mwd-dash-mini-h">Carduri afișate</div>
+							<?php foreach ( self::CARDS as $ck => $cl ) : ?>
+								<label><input type="checkbox" value="<?php echo esc_attr( $ck ); ?>" <?php checked( $this->visible( $ck ) ); ?> /> <?php echo esc_html( $cl ); ?></label>
+							<?php endforeach; ?>
+							<p class="mwd-dash-muted">Cardurile ascunse nu se mai încarcă deloc (dashboard mai rapid).</p>
+						</div>
+					</details>
 				</div>
 			</div>
 
-			<div class="mwd-dash-stats">
+			<?php if ( $this->visible( 'kpis' ) ) : ?>
+			<div class="mwd-dash-stats mwd-dash-slot" data-card="kpis">
 				<?php foreach ( $this->kpis( $woo, $vis, $days ) as $s ) : ?>
 					<a class="mwd-dash-stat" href="<?php echo esc_url( $s['url'] ); ?>">
 						<span class="mwd-dash-stat-ico"><span class="dashicons <?php echo esc_attr( $s['icon'] ); ?>"></span></span>
@@ -171,29 +252,43 @@ class MWD_AS_Dashboard {
 					</a>
 				<?php endforeach; ?>
 			</div>
+			<?php endif; ?>
 
-			<?php $this->card_trend( $woo, $vis, $days ); ?>
+			<?php
+			$this->slot(
+				'trend',
+				function () use ( $woo, $vis, $days ) {
+					$this->card_trend( $woo, $vis, $days );
+				}
+			);
+			?>
 
 			<div class="mwd-dash-grid">
 				<?php
 				if ( $vis ) {
-					$this->card_live();
+					$this->slot( 'live', array( $this, 'card_live' ) );
 				}
 				if ( $woo ) {
-					$this->card_woo( $woo, $days );
+					$this->slot( 'woo', function () use ( $woo, $days ) {
+						$this->card_woo( $woo, $days );
+					} );
 				}
 				if ( $vis ) {
-					$this->card_visitors( $vis, $days );
+					$this->slot( 'visitors', function () use ( $vis, $days ) {
+						$this->card_visitors( $vis, $days );
+					} );
 				}
 				if ( $woo ) {
-					$this->card_stock();
-					$this->card_attribution( $woo, $days );
-					$this->card_recent_orders();
+					$this->slot( 'stock', array( $this, 'card_stock' ) );
+					$this->slot( 'attribution', function () use ( $woo, $days ) {
+						$this->card_attribution( $woo, $days );
+					} );
+					$this->slot( 'orders', array( $this, 'card_recent_orders' ) );
 				} else {
-					$this->card_recent_content();
+					$this->slot( 'content', array( $this, 'card_recent_content' ) );
 				}
-				$this->card_actions();
-				$this->card_health();
+				$this->slot( 'actions', array( $this, 'card_actions' ) );
+				$this->slot( 'health', array( $this, 'card_health' ) );
 				?>
 			</div>
 		</div>

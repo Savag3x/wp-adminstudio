@@ -143,7 +143,8 @@
 		document.documentElement.classList.add( 'mwd-cmdk-open' );
 		input.value = '';
 		render();
-		window.setTimeout( function () { input.focus(); }, 0 );
+		// Focus sincron: tastele apăsate imediat după Ctrl/⌘ + K nu trebuie să se piardă.
+		input.focus();
 	}
 	function close() {
 		if ( ! root || root.hasAttribute( 'hidden' ) ) { return; }

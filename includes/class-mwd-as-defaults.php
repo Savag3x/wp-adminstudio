@@ -37,6 +37,10 @@ class MWD_AS_Defaults {
 			'geo_api'          => 1,
 			'exclude_ips'      => '',
 			'exclude_paths'    => '',
+			// Raport saptamanal pe email.
+			'report_enabled'   => 0,
+			'report_to'        => '', // gol = emailul administratorului
+			'report_day'       => 1,  // 1 = luni ... 7 = duminica
 			'retention_days'   => 120, // pastrarea datelor de analitice (30..730 zile)
 			'delete_on_uninstall' => 0, // sterge tabelele + optiunile la dezinstalare
 

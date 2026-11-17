@@ -17,7 +17,7 @@ class MWD_AS_Settings {
 		'enabled', 'layout_canvas', 'style_login', 'style_adminbar', 'custom_dashboard', 'collapse_menu', 'auto_group',
 		'menu_accordion', 'hide_separators', 'cmd_palette', 'track_visitors', 'woo_cards', 'anonymize_ip',
 		'geo_api', 'hide_wp_version', 'hide_wp_logo', 'hide_notices', 'block_access', 'guard_exempt_admins',
-		'delete_on_uninstall',
+		'delete_on_uninstall', 'report_enabled',
 	);
 
 	const COLORS = array( 'sidebar_bg', 'sidebar_text', 'accent', 'accent_hover', 'content_bg', 'link', 'login_bg' );
@@ -132,7 +132,7 @@ class MWD_AS_Settings {
 		foreach ( self::BOOLEANS as $k ) {
 			$out[ $k ] = empty( $post[ $k ] ) ? 0 : 1;
 		}
-		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'finish', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths', 'retention_days' ) ) as $k ) {
+		foreach ( array_merge( self::COLORS, array( 'font', 'radius', 'density', 'finish', 'login_layout', 'login_logo_url', 'login_tagline', 'dashboard_title', 'brand_menu_label', 'admin_footer_text', 'exclude_ips', 'exclude_paths', 'retention_days', 'report_to', 'report_day' ) ) as $k ) {
 			if ( isset( $post[ $k ] ) ) {
 				$out[ $k ] = $post[ $k ];
 			}
@@ -251,6 +251,9 @@ class MWD_AS_Settings {
 		$font         = isset( $in['font'] ) ? (string) $in['font'] : '';
 		$out['font']  = isset( $fonts[ $font ] ) ? $font : $d['font'];
 		$out['radius'] = isset( $in['radius'] ) ? max( 0, min( 28, (int) $in['radius'] ) ) : $d['radius'];
+		$emails            = isset( $in['report_to'] ) ? preg_split( '/[\s,;]+/', (string) $in['report_to'] ) : array();
+		$out['report_to']  = implode( ', ', array_filter( array_map( 'sanitize_email', (array) $emails ), 'is_email' ) );
+		$out['report_day'] = isset( $in['report_day'] ) ? max( 1, min( 7, (int) $in['report_day'] ) ) : 1;
 		$out['retention_days'] = isset( $in['retention_days'] ) ? max( 30, min( 730, (int) $in['retention_days'] ) ) : $d['retention_days'];
 		$out['finish']       = isset( $in['finish'] ) && 'flat' === $in['finish'] ? 'flat' : 'glossy';
 		$out['density']      = isset( $in['density'] ) && 'compact' === $in['density'] ? 'compact' : 'comfortable';
@@ -566,6 +569,8 @@ class MWD_AS_Settings {
 			'import_error' => array( 'error', 'Fișierul de import nu este valid.' ),
 			'reset'        => array( 'success', 'Configurația de meniu a rolului a fost resetată.' ),
 			'copied'       => array( 'success', 'Configurația de meniu a fost copiată.' ),
+			'report_sent'  => array( 'success', 'Raportul de test a fost trimis.' ),
+			'report_failed' => array( 'error', 'Emailul nu a putut fi trimis — verifică setările de email (SMTP) ale site-ului.' ),
 		);
 
 		$groups = array( 'Design', 'Marketing & SEO', 'Magazin', 'Conținut', 'Sistem' );
@@ -981,6 +986,28 @@ class MWD_AS_Settings {
 											<?php endforeach; ?>
 										</select>
 									</div>
+								</div>
+							</div>
+							<div class="mwd-as-card">
+								<h3>Raport săptămânal pe email</h3>
+								<?php $this->switch_row( 'report_enabled', 'Trimite raportul săptămânal', 'Vizite, vânzări, top pagini / surse / țări, comparate cu săptămâna anterioară. Trimis la ora 08:00.', $o['report_enabled'] ); ?>
+								<div class="mwd-as-grid-2 is-tight">
+									<div class="mwd-as-field">
+										<label class="mwd-as-label" for="report_to">Destinatari <small>(separați prin virgulă)</small></label>
+										<input type="text" name="report_to" id="report_to" value="<?php echo esc_attr( $o['report_to'] ); ?>" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>" />
+									</div>
+									<div class="mwd-as-field">
+										<label class="mwd-as-label" for="report_day">Ziua</label>
+										<select name="report_day" id="report_day">
+											<?php foreach ( array( 1 => 'Luni', 2 => 'Marți', 3 => 'Miercuri', 4 => 'Joi', 5 => 'Vineri', 6 => 'Sâmbătă', 7 => 'Duminică' ) as $dn => $dl ) : ?>
+												<option value="<?php echo (int) $dn; ?>" <?php selected( (int) $o['report_day'], $dn ); ?>><?php echo esc_html( $dl ); ?></option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+								</div>
+								<div class="mwd-as-row-btns" style="margin-top:12px">
+									<a class="mwd-as-btn mwd-as-btn-sm" target="_blank" rel="noopener" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=mwd_as_report_preview' ), 'mwd_as_report_preview' ) ); ?>"><span class="dashicons dashicons-visibility"></span> Previzualizează</a>
+									<a class="mwd-as-btn mwd-as-btn-sm" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=mwd_as_report_test' ), 'mwd_as_report_test' ) ); ?>"><span class="dashicons dashicons-email-alt"></span> Trimite un test acum</a>
 								</div>
 							</div>
 							<div class="mwd-as-card">

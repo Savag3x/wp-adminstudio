@@ -61,8 +61,10 @@ class MWD_AS_Client {
 	 *
 	 * @param string $ip      IP-ul (poate fi si anonimizat, ex. 86.120.4.0 — tara/orasul raman corecte).
 	 * @param bool   $headers Foloseste headerele cererii curente (doar pentru IP-ul vizitatorului curent).
+	 * @param bool   $remote  Permite apeluri catre servicii externe. Cu false se folosesc doar sursele
+	 *                        rapide (headere, cache, MaxMind local) — pentru calea critica a cererii.
 	 */
-	public static function geo( $ip, $headers = true ) {
+	public static function geo( $ip, $headers = true, $remote = true ) {
 		$out = array( 'country' => '', 'region' => '', 'city' => '' );
 
 		// 1) Headere CDN / modul GeoIP pe server.
@@ -113,7 +115,7 @@ class MWD_AS_Client {
 
 		// 3) Servicii externe (HTTPS), daca utilizatorul le permite.
 		$opts = MWD_AS_Defaults::get_options();
-		if ( ( '' === $found['country'] || '' === $found['city'] ) && ! empty( $opts['geo_api'] ) ) {
+		if ( $remote && ( '' === $found['country'] || '' === $found['city'] ) && ! empty( $opts['geo_api'] ) ) {
 			$api   = self::geo_api( $ip );
 			$found = self::merge( $found, $api );
 		}
@@ -125,7 +127,10 @@ class MWD_AS_Client {
 			$found
 		);
 		// Cache lung pentru succes, scurt pentru esec (nu repetam cereri catre servicii picate).
-		set_transient( $key, $found, '' !== $found['country'] ? 14 * DAY_IN_SECONDS : HOUR_IN_SECONDS );
+		// Fara apel extern, un rezultat gol nu se memoreaza (ar bloca rezolvarea ulterioara).
+		if ( $remote || '' !== $found['country'] ) {
+			set_transient( $key, $found, '' !== $found['country'] ? 14 * DAY_IN_SECONDS : HOUR_IN_SECONDS );
+		}
 
 		return self::merge( $out, $found );
 	}

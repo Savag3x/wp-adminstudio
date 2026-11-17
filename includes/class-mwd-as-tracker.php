@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class MWD_AS_Tracker {
 
-	const DB_VERSION    = '4';
+	const DB_VERSION    = '5';
 	const RETENTION_DAYS = 120;
 	const NS            = 'mwd-analytics/v1';
 
@@ -88,7 +88,8 @@ class MWD_AS_Tracker {
 			PRIMARY KEY (id),
 			KEY sid (sid),
 			KEY uid (uid),
-			KEY started_at (started_at)
+			KEY started_at (started_at),
+			KEY updated_at (updated_at)
 		) {$charset};";
 
 		$sql2 = "CREATE TABLE {$v} (
@@ -117,6 +118,7 @@ class MWD_AS_Tracker {
 		add_action( 'mwd_as_cleanup', array( __CLASS__, 'cleanup' ) );
 		// Completeaza tara / orasul pentru vizitele inregistrate fara locatie (ex. inainte de 2.4).
 		add_action( 'mwd_as_geo_backfill', array( __CLASS__, 'backfill_geo' ) );
+		add_action( 'mwd_as_geo_soon', array( __CLASS__, 'backfill_geo' ) );
 		add_action( 'admin_post_mwd_as_geo_backfill', array( $this, 'backfill_now' ) );
 		if ( ! wp_next_scheduled( 'mwd_as_geo_backfill' ) ) {
 			wp_schedule_event( time() + 300, 'hourly', 'mwd_as_geo_backfill' );
@@ -147,7 +149,8 @@ class MWD_AS_Tracker {
 		if ( ! $this->should_track() ) {
 			return;
 		}
-		wp_enqueue_script( 'mwd-as-track', MWD_AS_URL . 'assets/js/track.js', array(), MWD_AS_VERSION, true );
+		// `defer`: nu blocheaza randarea paginii vizitatorilor (WP < 6.3 il pune simplu in footer).
+		wp_enqueue_script( 'mwd-as-track', MWD_AS_URL . 'assets/js/track.js', array(), MWD_AS_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
 		wp_localize_script(
 			'mwd-as-track',
 			'MWDAnalytics',
@@ -196,7 +199,52 @@ class MWD_AS_Tracker {
 		return true; // lipsa header -> permitem (unele browsere)
 	}
 
+	/**
+	 * Limitare pe IP (max 120 cereri / minut) — doar cu cache de obiecte persistent
+	 * (Redis / Memcached), ca sa nu adaugam scrieri in baza de date la fiecare afisare.
+	 */
+	private static function rate_limited() {
+		if ( ! wp_using_ext_object_cache() ) {
+			return false;
+		}
+		$key = 'rl_' . md5( self::current_ip() ) . '_' . (int) floor( time() / 60 );
+		if ( false === wp_cache_add( $key, 1, 'mwd_as', 70 ) ) {
+			$n = (int) wp_cache_incr( $key, 1, 'mwd_as' );
+			return $n > (int) apply_filters( 'mwd_as_rate_limit', 120 );
+		}
+		return false;
+	}
+
+	/**
+	 * Rezolva locatia DUPA ce raspunsul a fost trimis browserului (apelurile externe pot dura
+	 * secunde si ar tine ocupat un proces PHP). Fara fastcgi/litespeed_finish_request,
+	 * se programeaza completarea prin WP-Cron.
+	 */
+	private function resolve_geo_later( $row_id, $ip ) {
+		$finish = function_exists( 'fastcgi_finish_request' ) ? 'fastcgi_finish_request' : ( function_exists( 'litespeed_finish_request' ) ? 'litespeed_finish_request' : '' );
+		if ( '' === $finish ) {
+			if ( ! wp_next_scheduled( 'mwd_as_geo_soon' ) ) {
+				wp_schedule_single_event( time() + 60, 'mwd_as_geo_soon' );
+			}
+			return;
+		}
+		register_shutdown_function(
+			function () use ( $finish, $row_id, $ip ) {
+				call_user_func( $finish );
+				$g = MWD_AS_Client::geo( $ip, false, true );
+				if ( '' === $g['country'] ) {
+					return;
+				}
+				global $wpdb;
+				$wpdb->update( self::sessions_table(), array( 'country' => $g['country'], 'region' => $g['region'], 'city' => $g['city'] ), array( 'id' => (int) $row_id ) );
+			}
+		);
+	}
+
 	public function rest_hit( $request ) {
+		if ( self::rate_limited() ) {
+			return new WP_REST_Response( array( 'ok' => false ), 200 );
+		}
 		if ( ! $this->same_origin() || $this->is_bot() ) {
 			return new WP_REST_Response( array( 'ok' => false ), 200 );
 		}
@@ -237,7 +285,8 @@ class MWD_AS_Tracker {
 		} else {
 			$ua  = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$ip  = $raw_ip;
-			$geo = MWD_AS_Client::geo( $ip ); // pe IP-ul complet, inainte de anonimizare
+			// Doar surse rapide aici (headere, cache, MaxMind local); serviciile externe ruleaza dupa raspuns.
+			$geo = MWD_AS_Client::geo( $ip, true, false ); // pe IP-ul complet, inainte de anonimizare
 			$dev = MWD_AS_Client::parse( $ua, isset( $p['h'] ) && is_array( $p['h'] ) ? $p['h'] : array() );
 
 			// Recurent? (uid vazut inainte)
@@ -274,6 +323,12 @@ class MWD_AS_Tracker {
 					'updated_at'   => $now,
 				)
 			);
+			if ( '' === $geo['country'] || '' === $geo['city'] ) {
+				$opts = MWD_AS_Defaults::get_options();
+				if ( ! empty( $opts['geo_api'] ) && $wpdb->insert_id ) {
+					$this->resolve_geo_later( (int) $wpdb->insert_id, $ip );
+				}
+			}
 		}
 
 		$wpdb->insert(
@@ -292,7 +347,7 @@ class MWD_AS_Tracker {
 	}
 
 	public function rest_beat( $request ) {
-		if ( ! $this->same_origin() ) {
+		if ( self::rate_limited() || ! $this->same_origin() ) {
 			return new WP_REST_Response( array( 'ok' => false ), 200 );
 		}
 		$p   = $request->get_json_params();
@@ -488,6 +543,8 @@ class MWD_AS_Tracker {
 		if ( ! self::ready() ) {
 			return 0;
 		}
+		// do_action( 'hook' ) fara argumente trimite un sir gol: revenim la valoarea implicita.
+		$limit = (int) $limit > 0 ? (int) $limit : 25;
 		global $wpdb;
 		$st = self::sessions_table();
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -532,12 +589,22 @@ class MWD_AS_Tracker {
 	public static function cleanup() {
 		global $wpdb;
 		$before = gmdate( 'Y-m-d H:i:s', strtotime( '-' . self::retention_days() . ' days' ) );
-		$s = self::sessions_table();
-		$v = self::views_table();
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$s} WHERE started_at < %s", $before ) );
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$v} WHERE created_at < %s", $before ) );
-		// phpcs:enable
+		// Pe loturi de 5.000 de randuri: o stergere uriasa intr-o singura interogare poate bloca tabelele.
+		foreach ( array( array( self::sessions_table(), 'started_at' ), array( self::views_table(), 'created_at' ) ) as $t ) {
+			list( $table, $col ) = $t;
+			for ( $i = 0; $i < 200; $i++ ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$table} WHERE {$col} < %s ORDER BY id ASC LIMIT 5000", $before ) );
+				if ( ! $ids ) {
+					break;
+				}
+				$wpdb->query( "DELETE FROM {$table} WHERE id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')' );
+				// phpcs:enable
+				if ( count( $ids ) < 5000 ) {
+					break;
+				}
+			}
+		}
 	}
 
 	/* ============ Rezumat dashboard ============ */
@@ -711,6 +778,102 @@ class MWD_AS_Tracker {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$st} WHERE started_at >= %s ORDER BY started_at DESC LIMIT %d", $dn, (int) $limit ) );
 	}
 
+	/* ============ Filtre pentru lista de vizite ============ */
+
+	/**
+	 * Filtrele din cerere (pagina Analitice / export), validate.
+	 */
+	public static function filters_from_request() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$g  = wp_unslash( $_GET );
+		$cc = isset( $g['country'] ) ? strtoupper( sanitize_text_field( (string) $g['country'] ) ) : '';
+		$dv = isset( $g['device'] ) ? sanitize_key( (string) $g['device'] ) : '';
+		// phpcs:enable
+		return array(
+			'country' => preg_match( '/^([A-Z]{2}|NONE)$/', $cc ) ? $cc : '',
+			'device'  => in_array( $dv, array( 'mobile', 'tablet', 'desktop' ), true ) ? $dv : '',
+			'source'  => isset( $g['source'] ) ? substr( sanitize_text_field( (string) $g['source'] ), 0, 100 ) : '',
+			'q'       => isset( $g['q'] ) ? substr( sanitize_text_field( (string) $g['q'] ), 0, 100 ) : '',
+			'type'    => isset( $g['type'] ) && in_array( $g['type'], array( 'new', 'returning' ), true ) ? $g['type'] : '',
+		);
+	}
+
+	/**
+	 * Clauza WHERE (cu argumente pentru prepare) pentru perioada + filtre. $days = 0 -> toata perioada.
+	 */
+	public static function filter_where( $days, $f ) {
+		global $wpdb;
+		$w    = array( '1=1' );
+		$args = array();
+		if ( $days > 0 ) {
+			$w[]    = 'started_at >= %s';
+			$args[] = gmdate( 'Y-m-d 00:00:00', strtotime( current_time( 'Y-m-d 00:00:00' ) . ' -' . ( (int) $days - 1 ) . ' days' ) );
+		}
+		if ( 'NONE' === $f['country'] ) {
+			$w[] = "country = ''";
+		} elseif ( '' !== $f['country'] ) {
+			$w[]    = 'country = %s';
+			$args[] = $f['country'];
+		}
+		if ( '' !== $f['device'] ) {
+			$w[]    = 'device = %s';
+			$args[] = $f['device'];
+		}
+		if ( 'direct' === $f['source'] ) {
+			$w[] = "referrer = '' AND utm_source = ''";
+		} elseif ( '' !== $f['source'] ) {
+			$w[]    = '(utm_source = %s OR referrer = %s)';
+			$args[] = $f['source'];
+			$args[] = $f['source'];
+		}
+		if ( '' !== $f['type'] ) {
+			$w[] = 'returning' === $f['type'] ? 'is_returning = 1' : 'is_returning = 0';
+		}
+		if ( '' !== $f['q'] ) {
+			$like   = '%' . $wpdb->esc_like( $f['q'] ) . '%';
+			$w[]    = '(ip LIKE %s OR entry_url LIKE %s OR exit_url LIKE %s OR city LIKE %s OR model LIKE %s)';
+			$args[] = $wpdb->esc_like( $f['q'] ) . '%';
+			array_push( $args, $like, $like, $like, $like );
+		}
+		return array( implode( ' AND ', $w ), $args );
+	}
+
+	/**
+	 * O pagina de vizite + totalul (pentru paginare).
+	 */
+	public static function query_sessions( $days, $f, $per_page = 50, $page = 1 ) {
+		if ( ! self::ready() ) {
+			return array( array(), 0 );
+		}
+		global $wpdb;
+		$st             = self::sessions_table();
+		list( $where, $args ) = self::filter_where( $days, $f );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$count_sql = "SELECT COUNT(*) FROM {$st} WHERE {$where}";
+		$total     = (int) $wpdb->get_var( $args ? $wpdb->prepare( $count_sql, $args ) : $count_sql );
+		$q_args    = array_merge( $args, array( (int) $per_page, (int) max( 0, ( $page - 1 ) * $per_page ) ) );
+		$rows      = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$st} WHERE {$where} ORDER BY started_at DESC LIMIT %d OFFSET %d", $q_args ) );
+		// phpcs:enable
+		return array( $rows, $total );
+	}
+
+	/**
+	 * Valorile disponibile pentru filtre (tari si surse din perioada).
+	 */
+	private static function filter_options( $days ) {
+		if ( ! self::ready() ) {
+			return array( array(), array() );
+		}
+		global $wpdb;
+		$st = self::sessions_table();
+		$dn = gmdate( 'Y-m-d 00:00:00', strtotime( current_time( 'Y-m-d 00:00:00' ) . ' -' . ( (int) $days - 1 ) . ' days' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$countries = $wpdb->get_col( $wpdb->prepare( "SELECT country FROM {$st} WHERE started_at >= %s AND country <> '' GROUP BY country ORDER BY COUNT(*) DESC LIMIT 60", $dn ) );
+		$sources   = $wpdb->get_col( $wpdb->prepare( "SELECT CASE WHEN utm_source <> '' THEN utm_source ELSE referrer END s FROM {$st} WHERE started_at >= %s AND (utm_source <> '' OR referrer <> '') GROUP BY s ORDER BY COUNT(*) DESC LIMIT 30", $dn ) );
+		// phpcs:enable
+		return array( $countries, $sources );
+	}
+
 	/* ============ Pagina Analitice ============ */
 
 	public function admin_page() {
@@ -740,16 +903,21 @@ class MWD_AS_Tracker {
 		if ( ! in_array( $days, $allowed, true ) ) {
 			$days = 7;
 		}
-		$s    = self::summary( $days );
-		$rows = self::recent_sessions( $days, 60 );
-		$base = admin_url( 'admin.php?page=mwd-analytics' );
+		$s       = self::summary( $days );
+		$filters = self::filters_from_request();
+		$pg      = isset( $_GET['pg'] ) ? max( 1, (int) $_GET['pg'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$per     = 50;
+		list( $rows, $total ) = self::query_sessions( $days, $filters, $per, $pg );
+		$pages   = max( 1, (int) ceil( $total / $per ) );
+		$base    = admin_url( 'admin.php?page=mwd-analytics' );
+		$keep    = array_filter( array_merge( array( 'p' => $days ), $filters ) );
 		?>
 		<div class="wrap mwd-an">
 			<h1 class="mwd-an-title">Analitice</h1>
 
 			<div class="mwd-an-period">
 				<?php foreach ( $allowed as $opt ) : ?>
-					<a class="mwd-an-pbtn<?php echo $opt === $days ? ' is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( 'p', $opt, $base ) ); ?>"><?php echo (int) $opt; ?> zile</a>
+					<a class="mwd-an-pbtn<?php echo $opt === $days ? ' is-active' : ''; ?>" href="<?php echo esc_url( add_query_arg( array_merge( $keep, array( 'p' => $opt ) ), $base ) ); ?>"><?php echo (int) $opt; ?> zile</a>
 				<?php endforeach; ?>
 			</div>
 
@@ -797,11 +965,53 @@ class MWD_AS_Tracker {
 			?>
 
 			<div class="mwd-an-head">
-				<h2 class="mwd-an-h2">Vizitatori recenți</h2>
+				<h2 class="mwd-an-h2">Vizite <span class="mwd-an-total"><?php echo esc_html( number_format_i18n( $total ) ); ?></span></h2>
+				<div class="mwd-an-head-actions">
+				<a class="button" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array_merge( $keep, array( 'action' => 'mwd_as_export_visitors' ) ), admin_url( 'admin-post.php' ) ), 'mwd_as_export_visitors' ) ); ?>"><span class="dashicons dashicons-download" style="vertical-align:-4px"></span> Export CSV<?php echo count( $keep ) > 1 ? ' (filtrat)' : ''; ?></a>
 				<?php if ( $missing ) : ?>
 					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=mwd_as_geo_backfill' ), 'mwd_as_geo_backfill' ) ); ?>"><span class="dashicons dashicons-location" style="vertical-align:-4px"></span> Completează locațiile lipsă (<?php echo (int) $missing; ?>)</a>
 				<?php endif; ?>
+				</div>
 			</div>
+
+			<?php
+			list( $f_countries, $f_sources ) = self::filter_options( $days );
+			$active_filters                  = count( array_filter( $filters ) );
+			?>
+			<form class="mwd-an-filters" method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
+				<input type="hidden" name="page" value="mwd-analytics" />
+				<input type="hidden" name="p" value="<?php echo (int) $days; ?>" />
+				<input type="search" name="q" value="<?php echo esc_attr( $filters['q'] ); ?>" placeholder="Caută IP, pagină, oraș, model…" />
+				<select name="country">
+					<option value="">Toate țările</option>
+					<?php foreach ( $f_countries as $cc ) : ?>
+						<option value="<?php echo esc_attr( $cc ); ?>" <?php selected( $filters['country'], $cc ); ?>><?php echo esc_html( trim( MWD_AS_Client::flag( $cc ) . ' ' . MWD_AS_Client::country_name( $cc ) ) ); ?></option>
+					<?php endforeach; ?>
+					<option value="NONE" <?php selected( $filters['country'], 'NONE' ); ?>>Necunoscută</option>
+				</select>
+				<select name="device">
+					<option value="">Toate dispozitivele</option>
+					<?php foreach ( $dev_names as $k => $n ) : ?>
+						<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $filters['device'], $k ); ?>><?php echo esc_html( $n ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<select name="source">
+					<option value="">Toate sursele</option>
+					<option value="direct" <?php selected( $filters['source'], 'direct' ); ?>>Direct</option>
+					<?php foreach ( $f_sources as $src_opt ) : ?>
+						<option value="<?php echo esc_attr( $src_opt ); ?>" <?php selected( $filters['source'], $src_opt ); ?>><?php echo esc_html( $src_opt ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<select name="type">
+					<option value="">Noi și recurenți</option>
+					<option value="new" <?php selected( $filters['type'], 'new' ); ?>>Doar noi</option>
+					<option value="returning" <?php selected( $filters['type'], 'returning' ); ?>>Doar recurenți</option>
+				</select>
+				<button type="submit" class="button button-primary">Filtrează</button>
+				<?php if ( $active_filters ) : ?>
+					<a class="button-link" href="<?php echo esc_url( add_query_arg( 'p', $days, $base ) ); ?>">Resetează (<?php echo (int) $active_filters; ?>)</a>
+				<?php endif; ?>
+			</form>
 			<?php if ( $geo_done >= 0 ) : ?>
 				<div class="notice notice-<?php echo $geo_done ? 'success' : 'warning'; ?> inline"><p>
 					<?php
@@ -884,11 +1094,23 @@ class MWD_AS_Tracker {
 						endforeach;
 					else :
 						?>
-						<tr><td colspan="9">Încă fără date pentru perioada selectată.</td></tr>
+						<tr><td colspan="9"><?php echo array_filter( $filters ) ? 'Nicio vizită nu corespunde filtrelor.' : 'Încă fără date pentru perioada selectată.'; ?></td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>
 			</div>
+			<?php if ( $pages > 1 ) : ?>
+				<nav class="mwd-an-pager" aria-label="Paginare">
+					<span><?php echo esc_html( sprintf( '%s–%s din %s', number_format_i18n( ( $pg - 1 ) * $per + 1 ), number_format_i18n( min( $total, $pg * $per ) ), number_format_i18n( $total ) ) ); ?></span>
+					<?php if ( $pg > 1 ) : ?>
+						<a class="button" href="<?php echo esc_url( add_query_arg( array_merge( $keep, array( 'pg' => $pg - 1 ) ), $base ) ); ?>">‹ Anterioare</a>
+					<?php endif; ?>
+					<span class="mwd-an-muted"><?php echo (int) $pg; ?> / <?php echo (int) $pages; ?></span>
+					<?php if ( $pg < $pages ) : ?>
+						<a class="button" href="<?php echo esc_url( add_query_arg( array_merge( $keep, array( 'pg' => $pg + 1 ) ), $base ) ); ?>">Următoarele ›</a>
+					<?php endif; ?>
+				</nav>
+			<?php endif; ?>
 			<?php if ( ! empty( $opts['anonymize_ip'] ) ) : ?>
 				<p class="description">IP-urile sunt anonimizate (ultimul octet = 0). Pentru IP complet, dezactivează „Anonimizează IP-ul" din Admin Studio → Dashboard & date.</p>
 			<?php endif; ?>

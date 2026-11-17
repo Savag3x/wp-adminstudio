@@ -3,7 +3,7 @@
  * Plugin Name:       MWD Admin Studio
  * Plugin URI:        https://mywebdesign.ro/
  * Description:       Reskin SaaS complet al panoului de administrare WordPress: design modern, paleta de comenzi (⌘K), meniu organizat pe sectiuni, manager de meniu/coloane pe roluri, login restilizat, dashboard si analitice.
- * Version:           2.4.0
+ * Version:           2.5.0
  * Author:            Alexandru Raileanu / MyWebDesign.ro
  * Author URI:        https://mywebdesign.ro/
  * Text Domain:       mwd-admin-studio
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'MWD_AS_VERSION', '2.4.0' );
+define( 'MWD_AS_VERSION', '2.5.0' );
 define( 'MWD_AS_FILE', __FILE__ );
 define( 'MWD_AS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MWD_AS_URL', plugin_dir_url( __FILE__ ) );
@@ -43,6 +43,7 @@ require_once MWD_AS_DIR . 'includes/class-mwd-as-columns.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-menucollapse.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-export.php';
 require_once MWD_AS_DIR . 'includes/class-mwd-as-palette.php';
+require_once MWD_AS_DIR . 'includes/class-mwd-as-report.php';
 
 /**
  * Bootstrap.
@@ -77,6 +78,7 @@ function mwd_as_init() {
 	// (altfel paginile "blocate" de Guard ar redeveni vizibile cand skin-ul e oprit).
 	( new MWD_AS_Menu() )->hooks();
 	( new MWD_AS_Branding() )->hooks();
+	( new MWD_AS_Report() )->hooks();
 
 	// Datele WooCommerce din dashboard se reimprospateaza imediat la comenzi / stoc noi.
 	if ( MWD_AS_Woo::active() ) {
@@ -134,5 +136,7 @@ register_activation_hook( __FILE__, 'mwd_as_activate' );
 function mwd_as_deactivate() {
 	wp_clear_scheduled_hook( 'mwd_as_cleanup' );
 	wp_clear_scheduled_hook( 'mwd_as_geo_backfill' );
+	wp_clear_scheduled_hook( 'mwd_as_geo_soon' );
+	wp_clear_scheduled_hook( 'mwd_as_weekly_report' );
 }
 register_deactivation_hook( __FILE__, 'mwd_as_deactivate' );

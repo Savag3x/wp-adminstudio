@@ -92,12 +92,15 @@ class MWD_AS_Export {
 		fputcsv( $out, array( 'Data', 'IP', 'Dispozitiv', 'Model', 'Browser', 'Versiune browser', 'OS', 'Versiune OS', 'Ecran', 'Limba', 'Tara', 'Regiune', 'Oras', 'Sursa', 'Pagina intrare', 'Pagini', 'Durata(s)', 'Recurent' ) );
 
 		if ( MWD_AS_Tracker::ready() ) {
+			// Aceleasi filtre ca in pagina Analitice (perioada 0 = toate datele).
+			$days                 = isset( $_GET['p'] ) ? max( 0, (int) $_GET['p'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			list( $where, $wargs ) = MWD_AS_Tracker::filter_where( $days, MWD_AS_Tracker::filters_from_request() );
 			// In loturi (pe id descrescator), ca exportul sa nu incarce zeci de mii de randuri in memorie.
 			$last  = PHP_INT_MAX;
 			$total = 0;
 			do {
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, started_at, ip, device, model, browser, browser_ver, os, os_ver, screen, lang, country, region, city, referrer, entry_url, pageviews, duration, is_returning FROM {$table} WHERE id < %d ORDER BY id DESC LIMIT 2000", $last ), ARRAY_A );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, started_at, ip, device, model, browser, browser_ver, os, os_ver, screen, lang, country, region, city, CASE WHEN utm_source <> '' THEN utm_source ELSE referrer END AS source, entry_url, pageviews, duration, is_returning FROM {$table} WHERE {$where} AND id < %d ORDER BY id DESC LIMIT 2000", array_merge( $wargs, array( $last ) ) ), ARRAY_A );
 				foreach ( $rows as $r ) {
 					$last = (int) $r['id'];
 					unset( $r['id'] );

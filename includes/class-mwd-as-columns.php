@@ -77,7 +77,7 @@ class MWD_AS_Columns {
 
 		if ( ! isset( $cache[ $id ] ) || $cache[ $id ] !== $labels ) {
 			$cache[ $id ] = $labels;
-			update_option( self::CACHE, $cache, false );
+			update_option( self::CACHE, $cache, true ); // mic si citit pe fiecare ecran de lista: autoload
 		}
 	}
 

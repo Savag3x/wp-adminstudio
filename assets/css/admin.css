@@ -966,3 +966,11 @@ body.mwd-as-active .mwd-an-pbtn.is-active, body.mwd-as-active .mwd-an-pbtn.is-ac
 .mwd-an-path ol { margin: 8px 0 2px 18px; padding: 0; }
 .mwd-an-path li { margin: 3px 0; font-size: 12px; white-space: nowrap; }
 .mwd-an-time { color: #a1a1aa; font-variant-numeric: tabular-nums; margin-right: 4px; }
+
+/* Analitice — filtre si paginare */
+.mwd-an-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mwd-an-total { margin-left: 6px; padding: 2px 9px; border-radius: 999px; background: #f4f4f5; color: #52525b; font-size: 12px; font-weight: 600; vertical-align: middle; }
+.mwd-an-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.mwd-an-filters input[type="search"] { min-width: 240px; }
+.mwd-an-filters select { max-width: 220px; }
+.mwd-an-pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 12px 0; font-size: 13px; color: #52525b; }

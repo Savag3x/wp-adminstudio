@@ -2,7 +2,7 @@
 
 Reskin SaaS complet al panoului de administrare WordPress: design modern, paletă de comenzi (⌘K), meniu lateral organizat pe secțiuni, manager de meniu și coloane pe roluri, login restilizat, dashboard și analitice integrate.
 
-- **Versiune:** 2.4.0
+- **Versiune:** 2.5.0
 - **Necesită:** WordPress 5.5+, PHP 7.2+
 - **Licență:** GPL-2.0-or-later
 
@@ -37,6 +37,25 @@ Nu se setează **niciodată** `overflow` / `position` / `z-index` pe `#adminmenu
 - `mwd_as_menu_essentials` — id-urile `<li>` care rămân mereu vizibile în sidebar
 
 ## Changelog
+
+### 2.5.0
+
+**Performanță**
+- Geolocația prin servicii externe nu mai blochează cererea de tracking: vizita se salvează instant (doar surse rapide: headere, cache, MaxMind local), iar locația se rezolvă după trimiterea răspunsului (`fastcgi_finish_request` / `litespeed_finish_request`) sau, pe alte servere, printr-un eveniment WP-Cron la 1 minut. Înainte, un vizitator nou putea ține ocupat un proces PHP până la ~9 secunde.
+- Index nou pe `updated_at` (baza de date v5): „Online acum", interogat la 20s din dashboard, nu mai scanează tot tabelul de sesiuni.
+- Curățarea datelor vechi se face pe loturi de 5.000 de rânduri (fără blocări lungi ale tabelelor mari).
+- Limitare a endpoint-ului de tracking: max. 120 cereri/minut per IP (când site-ul are cache de obiecte persistent — Redis/Memcached).
+- Scriptul de tracking de pe site se încarcă `defer` (nu mai întârzie afișarea paginilor pentru vizitatori).
+- `preconnect` către Google Fonts în admin; cache-ul de coloane e citit cu opțiunile preîncărcate (o interogare în minus pe fiecare listă).
+- Cardurile ascunse din dashboard nu se mai generează deloc (nici interogările lor).
+
+**Funcționalitate**
+- Analitice: **filtre** (țară, dispozitiv, sursă, vizitatori noi/recurenți, căutare după IP / pagină / oraș / model), **paginare** (50 pe pagină, cu total) și **export CSV filtrat**.
+- **Raport săptămânal pe email** (`includes/class-mwd-as-report.php`): vizite, vizitatori unici, afișări, timp mediu, vânzări și comenzi, top pagini / surse / țări, vânzări pe surse — comparate cu săptămâna anterioară. Destinatari multipli, ziua aleasă, trimis la 08:00; butoane „Previzualizează" și „Trimite un test acum".
+- **Dashboard personalizabil**: fiecare utilizator alege ce carduri vede (meniul „Personalizează"), salvat per utilizator.
+
+**Corecturi**
+- ⌘K: primele taste apăsate imediat după Ctrl/⌘ + K se pierdeau (câmpul primea focus cu întârziere).
 
 ### 2.4.0 — analitice exacte
 
